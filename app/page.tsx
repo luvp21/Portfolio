@@ -70,12 +70,12 @@ const getDefaultPositions = (isMobile: boolean, isTablet: boolean) => {
   } else {
     // Desktop: three columns
     return {
-      about: { x: 20, y: 30 },
-      projects: { x: 1200, y: 30 },
-      experience: { x: 20, y: 380 },
-      resume: { x: 500, y: 30 },
-      stack: { x: 500, y: 430 },
-      achievements: { x: 950, y: 30 },
+      about: { x: -10, y: 30 },
+      projects: { x: 1400, y: 30 },
+      experience: { x: -10, y: 380 },
+      resume: { x: 460, y: 425 },
+      stack: { x: 460, y: 30 },
+      achievements: { x: 930, y: 30 },
     }
   }
 }
@@ -84,12 +84,12 @@ const createDefaultPanelState = (isMobile: boolean, isTablet: boolean): Record<P
   const positions = getDefaultPositions(isMobile, isTablet)
   
   return {
-    about: { active: false, position: positions.about, minimized: false, zIndex: 1, pinned: false },
-    projects: { active: false, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
-    experience: { active: false, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
-    resume: { active: false, position: positions.resume, minimized: false, zIndex: 1, pinned: false },
-    stack: { active: false, position: positions.stack, minimized: false, zIndex: 1, pinned: false },
-    achievements: { active: false, position: positions.achievements, minimized: false, zIndex: 1, pinned: false },
+    about: { active: isMobile, position: positions.about, minimized: false, zIndex: 1, pinned: false },
+    projects: { active: isMobile, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
+    experience: { active: isMobile, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
+    resume: { active: isMobile, position: positions.resume, minimized: false, zIndex: 1, pinned: false },
+    stack: { active: isMobile, position: positions.stack, minimized: false, zIndex: 1, pinned: false },
+    achievements: { active: isMobile, position: positions.achievements, minimized: false, zIndex: 1, pinned: false },
   }
 }
 
@@ -185,9 +185,11 @@ export default function PortfolioInterface() {
   const { setTheme, theme } = useTheme()
   const canvasRef = useRef<HTMLDivElement>(null)
 
-  // Update panel positions when screen size changes
+  // Update panel positions and active states when screen size changes
   useEffect(() => {
     const newPositions = getDefaultPositions(isMobile, isTablet)
+    const newPanelState = createDefaultPanelState(isMobile, isTablet)
+    
     setPanels(prev => {
       const updated = { ...prev }
       Object.keys(updated).forEach(key => {
@@ -195,7 +197,8 @@ export default function PortfolioInterface() {
         if (newPositions[panelKey]) {
           updated[panelKey] = {
             ...updated[panelKey],
-            position: newPositions[panelKey]
+            position: newPositions[panelKey],
+            active: newPanelState[panelKey].active // Update active state based on screen size
           }
         }
       })
@@ -354,7 +357,7 @@ export default function PortfolioInterface() {
     if (!panels[panelType].active) return null
 
     return (
-      <div className="w-full border rounded-lg shadow-sm mb-4">
+      <div className="w-full border rounded-lg shadow-sm mb-4 ">
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             {icon}
@@ -372,12 +375,12 @@ export default function PortfolioInterface() {
   }
 
   return (
-    <div className="min-h-screen w-full transition-colors duration-300">
+    <div className="min-h-screen w-full transition-colors duration-300 grid-snap-background ">
       {/* Canvas Area */}
       <div
         ref={canvasRef}
         className={cn(
-          "relative w-screen h-screen transition-all duration-500",
+          "relative w-screen h-screen transition-all duration-500 grid-snap-background",
           isMobile ? "overflow-y-auto p-4" : "p-4 md:p-8"
         )}
       >
@@ -387,7 +390,7 @@ export default function PortfolioInterface() {
             onClick={() => setShowCommandBar(true)}
             className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 border cursor-pointer text-sm"
           >
-            Press / for commands
+            Press / for ?
           </button>
         </div>
 
@@ -452,7 +455,7 @@ export default function PortfolioInterface() {
           </div>
         ) : (
           /* Desktop Layout */
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full ">
             {/* Desktop Panels */}
             {panels.about.active && (
               <Panel
@@ -471,6 +474,7 @@ export default function PortfolioInterface() {
                 isPinned={panels.about.pinned}
                 onPinChange={(isPinned) => togglePinPanel("about", isPinned)}
                 dragConstraints={canvasRef}
+                className = "border-4 border-card"
               >
                 <ProfileCard />
               </Panel>
@@ -493,8 +497,9 @@ export default function PortfolioInterface() {
                 isPinned={panels.projects.pinned}
                 onPinChange={(isPinned) => togglePinPanel("projects", isPinned)}
                 dragConstraints={canvasRef}
+                className = "border-4 border-card"
               >
-                <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto max-h-[calc(100%-3rem)]">
+                <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto max-h-[calc(100%-3rem)] hide-scrollbar">
                   <ProjectCard
                     title="Interactive Portfolio"
                     description="A canvas-based portfolio with draggable panels and Command Terminal"
@@ -534,6 +539,7 @@ export default function PortfolioInterface() {
                 isPinned={panels.resume.pinned}
                 onPinChange={(isPinned) => togglePinPanel("resume", isPinned)}
                 dragConstraints={canvasRef}
+                className = "border-4 border-card"
               >
                 <Sandbox />
               </Panel>
@@ -556,6 +562,7 @@ export default function PortfolioInterface() {
                 isPinned={panels.stack.pinned}
                 onPinChange={(isPinned) => togglePinPanel("stack", isPinned)}
                 dragConstraints={canvasRef}
+                className = "border-4 border-card"
               >
                 <TechStack />
               </Panel>
@@ -578,8 +585,9 @@ export default function PortfolioInterface() {
                 isPinned={panels.experience.pinned}
                 onPinChange={(isPinned) => togglePinPanel("experience", isPinned)}
                 dragConstraints={canvasRef}
+                className = "border-4 border-card"
               >
-                <div className="p-4 overflow-y-auto max-h-[calc(100%-3rem)]">
+                <div className="p-4 overflow-y-auto max-h-[calc(100%-3rem)] hide-scrollbar">
                   <ExperienceTimeline />
                 </div>
               </Panel>
@@ -602,6 +610,7 @@ export default function PortfolioInterface() {
                 isPinned={panels.achievements.pinned}
                 onPinChange={(isPinned) => togglePinPanel("achievements", isPinned)}
                 dragConstraints={canvasRef}
+                className = "border-4 border-card"
               >
                 <AchievementsCard />
               </Panel>

@@ -278,24 +278,24 @@ export function Sandbox() {
    ctx.fillRect(0, 0, containerWidth, containerHeight)
 
    // Draw a decorative pattern with responsive grid size
-   ctx.strokeStyle = "rgba(163, 116, 255, 0.05)"
-   ctx.lineWidth = 0.5
+  //  ctx.strokeStyle = "rgba(163, 116, 255, 0.05)"
+  //  ctx.lineWidth = 0.5
 
    // Responsive grid size
-   const gridSize = isMobile ? 25 : isTablet ? 35 : 40
-   for (let x = 0; x < containerWidth; x += gridSize) {
-     ctx.beginPath()
-     ctx.moveTo(x, 0)
-     ctx.lineTo(x, containerHeight)
-     ctx.stroke()
-   }
+  //  const gridSize = isMobile ? 25 : isTablet ? 35 : 40
+  //  for (let x = 0; x < containerWidth; x += gridSize) {
+  //    ctx.beginPath()
+  //    ctx.moveTo(x, 0)
+  //    ctx.lineTo(x, containerHeight)
+  //    ctx.stroke()
+  //  }
 
-   for (let y = 0; y < containerHeight; y += gridSize) {
-     ctx.beginPath()
-     ctx.moveTo(0, y)
-     ctx.lineTo(containerWidth, y)
-     ctx.stroke()
-   }
+  //  for (let y = 0; y < containerHeight; y += gridSize) {
+  //    ctx.beginPath()
+  //    ctx.moveTo(0, y)
+  //    ctx.lineTo(containerWidth, y)
+  //    ctx.stroke()
+  //  }
 
    // Draw connections between stars with responsive distance
    ctx.beginPath()

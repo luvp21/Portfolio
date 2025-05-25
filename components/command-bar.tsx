@@ -69,7 +69,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     projects: "Open the Projects panel",
     experience: "Open the Experience panel",
     contact: "Open the Contact panel",
-    resume: "Open the Message Constellation panel",
+    Message: "Open the Message Constellation panel",
     skills: "View my technical skills",
 
     // Appearance
