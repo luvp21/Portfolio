@@ -392,7 +392,7 @@ export default function PortfolioInterface() {
         </div>
 
         <div className="absolute top-4 right-4 flex items-center gap-2 z-[9999]">
-          {!isMobile && (
+          {(
             <Button variant="outline" size="icon" onClick={resetPanelPositions} className="rounded-full">
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -610,7 +610,7 @@ export default function PortfolioInterface() {
         )}
 
         {/* Dock - only show on desktop and tablet */}
-        {!isMobile && (
+        {(
           <Dock
             onOpenPanel={togglePanel}
             activePanels={Object.entries(panels)
