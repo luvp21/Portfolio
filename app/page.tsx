@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { User, Briefcase, Moon, Sun, X, History, RotateCcw, FileText, Layers, Award } from "lucide-react"
+import { User, Briefcase, Moon, Sun, X, History, RotateCcw, FileText, Layers, Award } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
@@ -15,14 +15,7 @@ import { ExperienceTimeline } from "@/components/experience-timeline"
 import { Dock } from "@/components/dock"
 import { Sandbox } from "@/components/Sandbox"
 
-type PanelType = "about" | "projects" | "experience" | "resume" | "stack" | "achievements" | "theme"
-
-enum ScreenSize {
-  MOBILE = "mobile",
-  TABLET = "tablet",
-  DESKTOP = "desktop",
-  LARGE = "large",
-}
+type PanelType = "about" | "projects" | "experience" | "resume" | "stack" | "achievements"
 
 interface PanelState {
   active: boolean
@@ -32,136 +25,211 @@ interface PanelState {
   pinned: boolean
 }
 
-const getScreenSize = (): ScreenSize => {
-  if (typeof window === "undefined") return ScreenSize.DESKTOP // Default for SSR
+// Simple responsive breakpoint hook
+function useResponsive() {
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
 
-  const width = window.innerWidth
-  if (width < 768) return ScreenSize.MOBILE
-  if (width < 1024) return ScreenSize.TABLET
-  if (width < 1440) return ScreenSize.DESKTOP
-  return ScreenSize.LARGE
+  useEffect(() => {
+    const checkResponsive = () => {
+      const width = window.innerWidth
+      setIsMobile(width < 768) // md breakpoint
+      setIsTablet(width >= 768 && width < 1024) // lg breakpoint
+    }
+
+    checkResponsive()
+    window.addEventListener('resize', checkResponsive)
+    return () => window.removeEventListener('resize', checkResponsive)
+  }, [])
+
+  return { isMobile, isTablet, isDesktop: !isMobile && !isTablet }
 }
 
-const getPanelPositions = (screenSize: ScreenSize) => {
-  switch (screenSize) {
-    case ScreenSize.MOBILE:
-      return {
-        about: { x: 0, y: 10 },
-        projects: { x: 0, y: 20 },
-        experience: { x: 0, y: 30 },
-        resume: { x: 0, y: 40 },
-        stack: { x: 0, y: 50 },
-        achievements: { x: 0, y: 60 },
-        theme: { x: 0, y: 70 },
-      }
-    case ScreenSize.TABLET:
-      return {
-        about: { x: 20, y: 20 },
-        projects: { x: 500, y: 20 },
-        experience: { x: 20, y: 360 },
-        resume: { x: 180, y: 180 },
-        stack: { x: 20, y: 700 },
-        achievements: { x: 500, y: 360 },
-        theme: { x: 300, y: 300 },
-      }
-    case ScreenSize.DESKTOP:
-      return {
-        about: { x: 20, y: 30 },
-        projects: { x: 980, y: 30 },
-        experience: { x: 20, y: 380 },
-        resume: { x: 500, y: 180 },
-        stack: { x: 500, y: 30 },
-        achievements: { x: 500, y: 430 },
-        theme: { x: 500, y: 350 },
-      }
-    case ScreenSize.LARGE:
-      return {
-        about: { x: -10, y: 30 },
-        projects: { x: 1400, y: 30 },
-        experience: { x: -10, y: 375 },
-        resume: { x: 460, y: 430 },
-        stack: { x: 460, y: 30 },
-        achievements: { x: 930, y: 30 },
-        theme: { x: 500, y: 350 },
-      }
+// Default panel positions based on screen size
+const getDefaultPositions = (isMobile: boolean, isTablet: boolean) => {
+  if (isMobile) {
+    // Mobile: stack vertically with small offsets
+    return {
+      about: { x: 10, y: 20 },
+      projects: { x: 10, y: 40 },
+      experience: { x: 10, y: 60 },
+      resume: { x: 10, y: 80 },
+      stack: { x: 10, y: 100 },
+      achievements: { x: 10, y: 120 },
+    }
+  } else if (isTablet) {
+    // Tablet: two columns
+    return {
+      about: { x: 20, y: 20 },
+      projects: { x: 420, y: 20 },
+      experience: { x: 20, y: 380 },
+      resume: { x: 420, y: 380 },
+      stack: { x: 20, y: 740 },
+      achievements: { x: 420, y: 740 },
+    }
+  } else {
+    // Desktop: three columns
+    return {
+      about: { x: 20, y: 30 },
+      projects: { x: 1200, y: 30 },
+      experience: { x: 20, y: 380 },
+      resume: { x: 500, y: 30 },
+      stack: { x: 500, y: 430 },
+      achievements: { x: 950, y: 30 },
+    }
   }
 }
 
-const createDefaultPanelState = (screenSize: ScreenSize): Record<PanelType, PanelState> => {
-  const positions = getPanelPositions(screenSize)
-
+const createDefaultPanelState = (isMobile: boolean, isTablet: boolean): Record<PanelType, PanelState> => {
+  const positions = getDefaultPositions(isMobile, isTablet)
+  
   return {
-    about: { active: true, position: positions.about, minimized: false, zIndex: 1, pinned: false },
-    projects: { active: true, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
-    experience: { active: true, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
-    resume: { active: true, position: positions.resume, minimized: false, zIndex: 1, pinned: false },
-    stack: { active: true, position: positions.stack, minimized: false, zIndex: 1, pinned: false },
-    achievements: { active: true, position: positions.achievements, minimized: false, zIndex: 1, pinned: false },
-    theme: { active: false, position: positions.theme, minimized: false, zIndex: 1, pinned: false },
+    about: { active: false, position: positions.about, minimized: false, zIndex: 1, pinned: false },
+    projects: { active: false, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
+    experience: { active: false, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
+    resume: { active: false, position: positions.resume, minimized: false, zIndex: 1, pinned: false },
+    stack: { active: false, position: positions.stack, minimized: false, zIndex: 1, pinned: false },
+    achievements: { active: false, position: positions.achievements, minimized: false, zIndex: 1, pinned: false },
   }
 }
+
+const checkOverlap = (rect1: { x: number; y: number; width: number; height: number }, rect2: { x: number; y: number; width: number; height: number }) => {
+  return !(rect1.x + rect1.width <= rect2.x || 
+           rect2.x + rect2.width <= rect1.x || 
+           rect1.y + rect1.height <= rect2.y || 
+           rect2.y + rect2.height <= rect1.y);
+};
+
+const getPanelWidth = (panelType: PanelType): number => {
+  switch (panelType) {
+    case 'resume': return 920;
+    default: return 450;
+  }
+};
+
+const getPanelHeight = (panelType: PanelType): number => {
+  switch (panelType) {
+    case 'projects': return 905;
+    case 'experience': return 560;
+    case 'resume': return 505;
+    default: return 380;
+  }
+};
+
+const findAvailablePosition = (panelType: PanelType, defaultWidth: number = 450, defaultHeight: number = 400) => {
+  const activePanels = Object.entries(createDefaultPanelState(false, false))
+    .filter(([key, state]) => state.active && key !== panelType)
+    .map(([key, state]) => ({
+      x: state.position.x,
+      y: state.position.y,
+      width: getPanelWidth(key as PanelType),
+      height: getPanelHeight(key as PanelType),
+    }));
+
+  // Start with default position
+  let position = getDefaultPositions(false, false)[panelType];
+  
+  // If no active panels, use default
+  if (activePanels.length === 0) {
+    return position;
+  }
+
+  // Try to find a non-overlapping position
+  const maxAttempts = 20;
+  const stepSize = 30;
+  
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const testRect = {
+      x: position.x,
+      y: position.y,
+      width: defaultWidth,
+      height: defaultHeight,
+    };
+
+    const hasOverlap = activePanels.some(panel => checkOverlap(testRect, panel));
+    
+    if (!hasOverlap) {
+      // Check if position is within viewport
+      const maxX = window.innerWidth - defaultWidth - 20;
+      const maxY = window.innerHeight - defaultHeight - 20;
+      
+      if (position.x <= maxX && position.y <= maxY && position.x >= 20 && position.y >= 20) {
+        return position;
+      }
+    }
+
+    // Try next position (cascade effect)
+    if (attempt < 10) {
+      position = { x: position.x + stepSize, y: position.y + stepSize };
+    } else {
+      // Try different areas
+      position = {
+        x: 20 + (attempt - 10) * 100,
+        y: 20 + Math.floor((attempt - 10) / 5) * 150,
+      };
+    }
+  }
+
+  // Fallback to default if no good position found
+  return getDefaultPositions(false, false)[panelType];
+};
 
 export default function PortfolioInterface() {
   const [showCommandBar, setShowCommandBar] = useState(false)
   const [highestZIndex, setHighestZIndex] = useState(1)
-  const [showDock, setShowDock] = useState(true)
-  const [currentScreenSize, setCurrentScreenSize] = useState<ScreenSize>(
-    typeof window !== "undefined" ? getScreenSize() : ScreenSize.DESKTOP,
+  const { isMobile, isTablet } = useResponsive()
+  const [panels, setPanels] = useState<Record<PanelType, PanelState>>(
+    createDefaultPanelState(false, false) // Default to desktop initially
   )
-  const [isMobileView, setIsMobileView] = useState(false)
-
-  const [panels, setPanels] = useState<Record<PanelType, PanelState>>(createDefaultPanelState(currentScreenSize))
 
   const { setTheme, theme } = useTheme()
-  
-
   const canvasRef = useRef<HTMLDivElement>(null)
 
+  // Update panel positions when screen size changes
   useEffect(() => {
-    const initialScreenSize = getScreenSize()
-    setCurrentScreenSize(initialScreenSize)
-    setIsMobileView(initialScreenSize === ScreenSize.MOBILE)
-
-    if (initialScreenSize !== ScreenSize.MOBILE) {
-      const savedPanels = localStorage.getItem("portfolioPanels")
-      if (savedPanels) {
-        try {
-          setPanels(JSON.parse(savedPanels))
-        } catch (e) {
-          console.error("Error loading saved panel positions", e)
-          setPanels(createDefaultPanelState(initialScreenSize))
+    const newPositions = getDefaultPositions(isMobile, isTablet)
+    setPanels(prev => {
+      const updated = { ...prev }
+      Object.keys(updated).forEach(key => {
+        const panelKey = key as PanelType
+        if (newPositions[panelKey]) {
+          updated[panelKey] = {
+            ...updated[panelKey],
+            position: newPositions[panelKey]
+          }
         }
-      } else {
-        setPanels(createDefaultPanelState(initialScreenSize))
-      }
-    } else {
-      setPanels(createDefaultPanelState(initialScreenSize))
-    }
-  }, [])
+      })
+      return updated
+    })
+  }, [isMobile, isTablet])
 
+  // Load saved positions on mount (desktop only)
   useEffect(() => {
-    const handleResize = () => {
-      const newScreenSize = getScreenSize()
-      setCurrentScreenSize(newScreenSize)
-      setIsMobileView(newScreenSize === ScreenSize.MOBILE)
-
-      const wasMobile = isMobileView
-      const isMobile = newScreenSize === ScreenSize.MOBILE
-
-      if (wasMobile !== isMobile) {
-        resetPanelPositions()
+    if (!isMobile) {
+      const saved = localStorage.getItem("portfolioPanels")
+      if (saved) {
+        try {
+          setPanels(JSON.parse(saved))
+        } catch (e) {
+          console.error("Error loading saved panels:", e)
+        }
       }
     }
+  }, [isMobile])
 
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [isMobileView])
+  // Save positions when they change (desktop only)
+  useEffect(() => {
+    if (!isMobile) {
+      localStorage.setItem("portfolioPanels", JSON.stringify(panels))
+    }
+  }, [panels, isMobile])
 
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey && e.key === "k") || e.key === "/") {
         e.preventDefault()
-        setShowCommandBar((prev) => !prev)
+        setShowCommandBar(prev => !prev)
       }
     }
 
@@ -169,45 +237,36 @@ export default function PortfolioInterface() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  useEffect(() => {
-    if (!isMobileView) {
-      localStorage.setItem("portfolioPanels", JSON.stringify(panels))
-    }
-  }, [panels, isMobileView])
-
   const executeCommand = (command: string) => {
     const cmd = command.toLowerCase()
 
-    const panelMap: Record<string, string> = {
+    const panelMap: Record<string, PanelType> = {
       about: "about",
-      a: "about",
       projects: "projects",
-      p: "projects",
       experience: "experience",
-      e: "experience",
       resume: "resume",
-      cv: "resume",
       stack: "stack",
       achievements: "achievements",
-      skills: "achievements",
-      s: "achievements",
-      theme: "theme",
     }
 
-    if (cmd in panelMap) togglePanel(panelMap[cmd])
-    else if (["dark", "dark mode"].includes(cmd)) setTheme("dark")
-    else if (["light", "light mode"].includes(cmd)) setTheme("light")
-    else if (cmd === "reset") resetPanelPositions()
-    else if (cmd === "dock") setShowDock((prev) => !prev)
+    if (cmd in panelMap) {
+      togglePanel(panelMap[cmd])
+    } else if (["dark", "dark mode"].includes(cmd)) {
+      setTheme("dark")
+    } else if (["light", "light mode"].includes(cmd)) {
+      setTheme("light")
+    } else if (cmd === "reset") {
+      resetPanelPositions()
+    }
   }
 
   const resetPanelPositions = () => {
-    setPanels(createDefaultPanelState(currentScreenSize))
+    setPanels(createDefaultPanelState(isMobile, isTablet))
   }
 
   const updatePanelPosition = (panel: PanelType, x: number, y: number) => {
-    if (!isMobileView) {
-      setPanels((prev) => ({
+    if (!isMobile) {
+      setPanels(prev => ({
         ...prev,
         [panel]: {
           ...prev[panel],
@@ -218,20 +277,40 @@ export default function PortfolioInterface() {
   }
 
   const togglePanel = (panel: PanelType) => {
-    setPanels((prev) => ({
-      ...prev,
-      [panel]: {
-        ...prev[panel],
-        active: !prev[panel].active,
-        minimized: false,
-        zIndex: highestZIndex + 1,
-      },
-    }))
-    setHighestZIndex((prev) => prev + 1)
+    setPanels(prev => {
+      const isCurrentlyActive = prev[panel].active;
+      
+      if (!isCurrentlyActive) {
+        // Panel is being opened - find a good position
+        const newPosition = findAvailablePosition(panel, getPanelWidth(panel), getPanelHeight(panel));
+        
+        return {
+          ...prev,
+          [panel]: {
+            ...prev[panel],
+            active: true,
+            position: newPosition,
+            minimized: false,
+            zIndex: highestZIndex + 1,
+          },
+        };
+      } else {
+        // Panel is being closed
+        return {
+          ...prev,
+          [panel]: {
+            ...prev[panel],
+            active: false,
+          },
+        };
+      }
+    });
+    
+    setHighestZIndex(prev => prev + 1)
   }
 
   const minimizePanel = (panel: PanelType) => {
-    setPanels((prev) => ({
+    setPanels(prev => ({
       ...prev,
       [panel]: {
         ...prev[panel],
@@ -241,7 +320,7 @@ export default function PortfolioInterface() {
   }
 
   const closePanel = (panel: PanelType) => {
-    setPanels((prev) => ({
+    setPanels(prev => ({
       ...prev,
       [panel]: {
         ...prev[panel],
@@ -251,7 +330,7 @@ export default function PortfolioInterface() {
   }
 
   const togglePinPanel = (panel: PanelType, isPinned: boolean) => {
-    setPanels((prev) => ({
+    setPanels(prev => ({
       ...prev,
       [panel]: {
         ...prev[panel],
@@ -261,162 +340,59 @@ export default function PortfolioInterface() {
   }
 
   const bringToFront = (panel: PanelType) => {
-    setPanels((prev) => ({
+    setPanels(prev => ({
       ...prev,
       [panel]: {
         ...prev[panel],
         zIndex: highestZIndex + 1,
       },
     }))
-    setHighestZIndex((prev) => prev + 1)
+    setHighestZIndex(prev => prev + 1)
   }
 
-  const renderMobilePanels = () => {
+  const renderMobilePanel = (panelType: PanelType, title: string, icon: React.ReactNode, children: React.ReactNode, maxHeight?: string) => {
+    if (!panels[panelType].active) return null
+
     return (
-      <div className="flex flex-col gap-4 w-full px-2 py-4">
-        {panels.about.active && (
-          <div className="w-full border rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <h3 className="font-medium">About Me</h3>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => closePanel("about")}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-4">
-              <ProfileCard />
-            </div>
+      <div className="w-full border rounded-lg shadow-sm mb-4">
+        <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center gap-2">
+            {icon}
+            <h3 className="font-medium">{title}</h3>
           </div>
-        )}
-
-        {panels.stack.active && (
-          <div className="w-full border rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
-                <h3 className="font-medium">Tech Stack</h3>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => closePanel("stack")}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-4">
-              <TechStack />
-            </div>
-          </div>
-        )}
-
-        {panels.achievements.active && (
-          <div className="w-full border rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <Award className="h-4 w-4" />
-                <h3 className="font-medium">Achievements</h3>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => closePanel("achievements")}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-4">
-              <AchievementsCard />
-            </div>
-          </div>
-        )}
-
-        {panels.experience.active && (
-          <div className="w-full border rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <History className="h-4 w-4" />
-                <h3 className="font-medium">Experience</h3>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => closePanel("experience")}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-4 max-h-[600px] overflow-y-auto hide-scrollbar">
-              <ExperienceTimeline />
-            </div>
-          </div>
-        )}
-
-        {panels.projects.active && (
-          <div className="w-full border rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                <h3 className="font-medium">Projects</h3>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => closePanel("projects")}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-4">
-              <div className="grid grid-cols-1 gap-4 max-h-[800px] overflow-y-auto hide-scrollbar">
-                <ProjectCard
-                  title="Interactive Portfolio"
-                  description="A canvas-based portfolio with draggable panels and easter eggs"
-                  tags={["React", "Three.js", "Framer Motion"]}
-                  image="/portfolio.png?height=120&width=200"
-                />
-                <ProjectCard
-                  title="AI Chat Interface"
-                  description="A modern chat interface with AI-powered responses"
-                  tags={["Next.js", "OpenAI", "Tailwind"]}
-                  image="/placeholder.svg?height=120&width=200"
-                />
-                <ProjectCard
-                  title="E-commerce Dashboard"
-                  description="Admin dashboard for managing products and orders"
-                  tags={["TypeScript", "Redux", "Material UI"]}
-                  image="/placeholder.svg?height=120&width=200"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {panels.resume.active && (
-          <div className="w-full border rounded-lg shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <h3 className="font-medium">Message Constellation</h3>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => closePanel("resume")}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-4 h-[600px]">
-              <Sandbox />
-            </div>
-          </div>
-        )}
+          <Button variant="ghost" size="icon" onClick={() => closePanel(panelType)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className={cn("p-4", maxHeight && `max-h-[${maxHeight}] overflow-y-auto`)}>
+          {children}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className={cn("min-h-screen w-full transition-colors duration-300")}>
+    <div className="min-h-screen w-full transition-colors duration-300">
       {/* Canvas Area */}
       <div
         ref={canvasRef}
         className={cn(
-          "relative w-full h-screen transition-all duration-500 z-0",
-          isMobileView ? "overflow-y-auto p-2" : "p-4 md:p-8 grid-snap-background",
+          "relative w-screen h-screen transition-all duration-500",
+          isMobile ? "overflow-y-auto p-4" : "p-4 md:p-8"
         )}
       >
         {/* Header Controls */}
         <div className="absolute top-4 left-4 z-[9999] flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 border">
-            <span className="text-sm font-medium">Press / for ?</span>
-          </div>
+          <button
+            onClick={() => setShowCommandBar(true)}
+            className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 border cursor-pointer text-sm"
+          >
+            Press / for commands
+          </button>
         </div>
 
         <div className="absolute top-4 right-4 flex items-center gap-2 z-[9999]">
-          {!isMobileView && (
+          {!isMobile && (
             <Button variant="outline" size="icon" onClick={resetPanelPositions} className="rounded-full">
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -432,19 +408,52 @@ export default function PortfolioInterface() {
           </Button>
         </div>
 
-        {showDock && !isMobileView && (
-          <Dock
-            onOpenPanel={togglePanel}
-            activePanels={Object.entries(panels)
-              .filter(([_, state]) => state.active)
-              .map(([key]) => key as PanelType)}
-          />
-        )}
-
-        {isMobileView ? (
-          renderMobilePanels()
+        {/* Mobile Layout */}
+        {isMobile ? (
+          <div className="pt-20 pb-20 space-y-4">
+            {renderMobilePanel("about", "About Me", <User className="h-4 w-4" />, <ProfileCard />, "500px")}
+            {renderMobilePanel("stack", "Tech Stack", <Layers className="h-4 w-4" />, <TechStack />, "500px")}
+            {renderMobilePanel("achievements", "Achievements", <Award className="h-4 w-4" />, <AchievementsCard />, "500px")}
+            {renderMobilePanel("experience", "Experience", <History className="h-4 w-4" />, 
+              <div className="max-h-[600px] overflow-y-auto">
+                <ExperienceTimeline />
+              </div>,
+              "600px"
+            )}
+            {renderMobilePanel("projects", "Projects", <Briefcase className="h-4 w-4" />, 
+              <div className="space-y-4 max-h-[800px] overflow-y-auto">
+                <ProjectCard
+                  title="Interactive Portfolio"
+                  description="A canvas-based portfolio with draggable panels and Command Terminal"
+                  tags={["Next.js", "Framer Motion", "Tailwind"]}
+                  image="/portfolio.png"
+                />
+                <ProjectCard
+                  title="EV Rental Website"
+                  description="EV rental system with secure KYC, real-time tracking, and automated payments."
+                  tags={["React", "Tailwind"]}
+                  image="/erental.png"
+                />
+                <ProjectCard
+                  title="Excalidraw Clone"
+                  description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
+                  tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
+                  image="/excalidraw.png"
+                />
+              </div>,
+              "800px"
+            )}
+            {renderMobilePanel("resume", "Message Constellation", <FileText className="h-4 w-4" />, 
+              <div className="h-[300px] sm:h-[400px]">
+                <Sandbox />
+              </div>,
+              "500px"
+            )}
+          </div>
         ) : (
+          /* Desktop Layout */
           <div className="relative w-full h-full">
+            {/* Desktop Panels */}
             {panels.about.active && (
               <Panel
                 title="About Me"
@@ -485,24 +494,24 @@ export default function PortfolioInterface() {
                 onPinChange={(isPinned) => togglePinPanel("projects", isPinned)}
                 dragConstraints={canvasRef}
               >
-                <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto max-h-[calc(100%-3rem)] hide-scrollbar">
+                <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto max-h-[calc(100%-3rem)]">
                   <ProjectCard
                     title="Interactive Portfolio"
                     description="A canvas-based portfolio with draggable panels and Command Terminal"
                     tags={["Next.js", "Framer Motion", "Tailwind"]}
-                    image="/portfolio.png?height=120&width=200"
+                    image="/portfolio.png"
                   />
                   <ProjectCard
                     title="EV Rental Website"
                     description="EV rental system with secure KYC, real-time tracking, and automated payments."
-                    tags={[ "React", "Tailwind"]}
-                    image="/erental.png?height=120&width=200"
+                    tags={["React", "Tailwind"]}
+                    image="/erental.png"
                   />
                   <ProjectCard
                     title="Excalidraw Clone"
                     description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
                     tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
-                    image="/excalidraw.png?height=120&width=200"
+                    image="/excalidraw.png"
                   />
                 </div>
               </Panel>
@@ -525,13 +534,11 @@ export default function PortfolioInterface() {
                 isPinned={panels.resume.pinned}
                 onPinChange={(isPinned) => togglePinPanel("resume", isPinned)}
                 dragConstraints={canvasRef}
-                className="border-4 border-card"
               >
                 <Sandbox />
               </Panel>
             )}
 
-            {/* Utility Panels */}
             {panels.stack.active && (
               <Panel
                 title="Tech Stack"
@@ -572,7 +579,7 @@ export default function PortfolioInterface() {
                 onPinChange={(isPinned) => togglePinPanel("experience", isPinned)}
                 dragConstraints={canvasRef}
               >
-                <div className="p-4 overflow-y-auto max-h-[calc(100%-3rem)] hide-scrollbar">
+                <div className="p-4 overflow-y-auto max-h-[calc(100%-3rem)]">
                   <ExperienceTimeline />
                 </div>
               </Panel>
@@ -602,7 +609,22 @@ export default function PortfolioInterface() {
           </div>
         )}
 
-        <CommandBar open={showCommandBar} onOpenChange={setShowCommandBar} onExecuteCommand={executeCommand} />
+        {/* Dock - only show on desktop and tablet */}
+        {!isMobile && (
+          <Dock
+            onOpenPanel={togglePanel}
+            activePanels={Object.entries(panels)
+              .filter(([_, state]) => state.active)
+              .map(([key]) => key as PanelType)}
+          />
+        )}
+
+        {/* Command Bar */}
+        <CommandBar 
+          open={showCommandBar} 
+          onOpenChange={setShowCommandBar} 
+          onExecuteCommand={executeCommand} 
+        />
       </div>
     </div>
   )
