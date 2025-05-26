@@ -83,96 +83,19 @@ const getDefaultPositions = (isMobile: boolean, isTablet: boolean) => {
 const createDefaultPanelState = (isMobile: boolean, isTablet: boolean): Record<PanelType, PanelState> => {
   const positions = getDefaultPositions(isMobile, isTablet)
   
+  // Panels are active by default only on mobile
+  const defaultActive = isMobile
+  
   return {
-    about: { active: isMobile, position: positions.about, minimized: false, zIndex: 1, pinned: false },
-    projects: { active: isMobile, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
-    experience: { active: isMobile, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
-    resume: { active: isMobile, position: positions.resume, minimized: false, zIndex: 1, pinned: false },
-    stack: { active: isMobile, position: positions.stack, minimized: false, zIndex: 1, pinned: false },
-    achievements: { active: isMobile, position: positions.achievements, minimized: false, zIndex: 1, pinned: false },
+    about: { active: defaultActive, position: positions.about, minimized: false, zIndex: 1, pinned: false },
+    projects: { active: defaultActive, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
+    experience: { active: defaultActive, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
+    resume: { active: defaultActive, position: positions.resume, minimized: false, zIndex: 1, pinned: false },
+    stack: { active: defaultActive, position: positions.stack, minimized: false, zIndex: 1, pinned: false },
+    achievements: { active: defaultActive, position: positions.achievements, minimized: false, zIndex: 1, pinned: false },
   }
 }
 
-const checkOverlap = (rect1: { x: number; y: number; width: number; height: number }, rect2: { x: number; y: number; width: number; height: number }) => {
-  return !(rect1.x + rect1.width <= rect2.x || 
-           rect2.x + rect2.width <= rect1.x || 
-           rect1.y + rect1.height <= rect2.y || 
-           rect2.y + rect2.height <= rect1.y);
-};
-
-const getPanelWidth = (panelType: PanelType): number => {
-  switch (panelType) {
-    case 'resume': return 920;
-    default: return 450;
-  }
-};
-
-const getPanelHeight = (panelType: PanelType): number => {
-  switch (panelType) {
-    case 'projects': return 905;
-    case 'experience': return 560;
-    case 'resume': return 505;
-    default: return 380;
-  }
-};
-
-const findAvailablePosition = (panelType: PanelType, defaultWidth: number = 450, defaultHeight: number = 400) => {
-  const activePanels = Object.entries(createDefaultPanelState(false, false))
-    .filter(([key, state]) => state.active && key !== panelType)
-    .map(([key, state]) => ({
-      x: state.position.x,
-      y: state.position.y,
-      width: getPanelWidth(key as PanelType),
-      height: getPanelHeight(key as PanelType),
-    }));
-
-  // Start with default position
-  let position = getDefaultPositions(false, false)[panelType];
-  
-  // If no active panels, use default
-  if (activePanels.length === 0) {
-    return position;
-  }
-
-  // Try to find a non-overlapping position
-  const maxAttempts = 20;
-  const stepSize = 30;
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const testRect = {
-      x: position.x,
-      y: position.y,
-      width: defaultWidth,
-      height: defaultHeight,
-    };
-
-    const hasOverlap = activePanels.some(panel => checkOverlap(testRect, panel));
-    
-    if (!hasOverlap) {
-      // Check if position is within viewport
-      const maxX = window.innerWidth - defaultWidth - 20;
-      const maxY = window.innerHeight - defaultHeight - 20;
-      
-      if (position.x <= maxX && position.y <= maxY && position.x >= 20 && position.y >= 20) {
-        return position;
-      }
-    }
-
-    // Try next position (cascade effect)
-    if (attempt < 10) {
-      position = { x: position.x + stepSize, y: position.y + stepSize };
-    } else {
-      // Try different areas
-      position = {
-        x: 20 + (attempt - 10) * 100,
-        y: 20 + Math.floor((attempt - 10) / 5) * 150,
-      };
-    }
-  }
-
-  // Fallback to default if no good position found
-  return getDefaultPositions(false, false)[panelType];
-};
 
 export default function PortfolioInterface() {
   const [showCommandBar, setShowCommandBar] = useState(false)
@@ -280,38 +203,18 @@ export default function PortfolioInterface() {
   }
 
   const togglePanel = (panel: PanelType) => {
-    setPanels(prev => {
-      const isCurrentlyActive = prev[panel].active;
-      
-      if (!isCurrentlyActive) {
-        // Panel is being opened - find a good position
-        const newPosition = findAvailablePosition(panel, getPanelWidth(panel), getPanelHeight(panel));
-        
-        return {
-          ...prev,
-          [panel]: {
-            ...prev[panel],
-            active: true,
-            position: newPosition,
-            minimized: false,
-            zIndex: highestZIndex + 1,
-          },
-        };
-      } else {
-        // Panel is being closed
-        return {
-          ...prev,
-          [panel]: {
-            ...prev[panel],
-            active: false,
-          },
-        };
-      }
-    });
-    
-    setHighestZIndex(prev => prev + 1)
+    setPanels((prev) => ({
+      ...prev,
+      [panel]: {
+        ...prev[panel],
+        active: !prev[panel].active,
+        minimized: false,
+        zIndex: highestZIndex + 1,
+      },
+    }))
+    setHighestZIndex((prev) => prev + 1)
   }
-
+  
   const minimizePanel = (panel: PanelType) => {
     setPanels(prev => ({
       ...prev,
@@ -357,7 +260,7 @@ export default function PortfolioInterface() {
     if (!panels[panelType].active) return null
 
     return (
-      <div className="w-full border rounded-lg shadow-sm mb-4 ">
+      <div className="w-full border rounded-lg shadow-sm mb-4 bg-card">
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             {icon}
@@ -395,7 +298,7 @@ export default function PortfolioInterface() {
         </div>
 
         <div className="absolute top-4 right-4 flex items-center gap-2 z-[9999]">
-          {(
+          {!isMobile && ( // Only show reset button on non-mobile devices
             <Button variant="outline" size="icon" onClick={resetPanelPositions} className="rounded-full">
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -424,7 +327,7 @@ export default function PortfolioInterface() {
               "600px"
             )}
             {renderMobilePanel("projects", "Projects", <Briefcase className="h-4 w-4" />, 
-              <div className="space-y-4 max-h-[800px] overflow-y-auto">
+              <div className="space-y-4 max-h-[800px] overflow-y-auto p-2">
                 <ProjectCard
                   title="Interactive Portfolio"
                   description="A canvas-based portfolio with draggable panels and Command Terminal"
@@ -619,7 +522,7 @@ export default function PortfolioInterface() {
         )}
 
         {/* Dock - only show on desktop and tablet */}
-        {(
+        {!isMobile && ( // Hide dock on mobile
           <Dock
             onOpenPanel={togglePanel}
             activePanels={Object.entries(panels)
