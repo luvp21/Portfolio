@@ -599,7 +599,7 @@ export function Sandbox() {
                    id="name"
                    value={name}
                    onChange={(e) => setName(e.target.value)}
-                   placeholder="Enter your name"
+                   placeholder="Who are you, mysterious visitor?"
                    className={`bg-black/50 border-[#A374FF]/30 text-[#fffff3] placeholder:text-[#fffff3]/50 ${
                      isMobile ? 'text-sm' : ''
                    }`}
@@ -615,7 +615,7 @@ export function Sandbox() {
                    id="message"
                    value={message}
                    onChange={(e) => setMessage(e.target.value)}
-                   placeholder="Share your thoughts..."
+                   placeholder="Drop a message into the void..."
                    className={`bg-black/50 border-[#A374FF]/30 text-[#fffff3] placeholder:text-[#fffff3]/50 ${
                      isMobile ? 'min-h-[80px] text-sm' : 'min-h-[100px]'
                    }`}

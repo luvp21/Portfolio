@@ -30,6 +30,7 @@ const config = {
         dock: "var(--dock)",
         name: "var(--name)",
         title: "var(--title)",
+        cborder: "var(--cborder)",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

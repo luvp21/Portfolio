@@ -45,9 +45,9 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
   const historyRef = useRef<HTMLDivElement | null>(null)
 
   // Available commands - removed blog, theme, and project-specific commands
-  const navigationCommands = ["about", "projects", "experience", "contact", "resume", "skills"]
+  const navigationCommands = ["about", "projects", "experience", "Message", "achievements", "stack"]
   const appearanceCommands = ["dark", "light"]
-  const toolsCommands = ["achievements", "stack", "reset"]
+  const toolsCommands = ["reset"]
   const socialCommands = ["github", "linkedin", "twitter", "email"]
   const messageCommands = ["addmessage", "viewmessages", "constellation"]
   const systemCommands = ["help", "clear", "close", "downloadcv"]
@@ -68,7 +68,6 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     about: "Open the About Me panel",
     projects: "Open the Projects panel",
     experience: "Open the Experience panel",
-    contact: "Open the Contact panel",
     Message: "Open the Message Constellation panel",
     skills: "View my technical skills",
 
@@ -360,7 +359,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
   // Render help content with terminal-style formatting
   const renderHelpContent = () => {
     return (
-      <div className="p-2 text-sm">
+      <div className="p-2 text-sm rounded">
         <div className="flex items-center text-muted-foreground mb-3">
           <span className="mr-2 font-mono">{">"}</span>
           <span className="mr-1 text-[#A374FF]">_</span>
@@ -455,21 +454,21 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-start justify-end bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-start justify-end bg-black/50 backdrop-blur-sm rounded-lg py-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => onOpenChange(false)}
         >
           <motion.div
-            className="w-full max-w-sm h-full bg-background border-l shadow-lg overflow-hidden flex flex-col"
+            className="w-full max-w-sm h-full bg-background shadow-lg rounded-lg overflow-hidden flex flex-col"
             initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full rounded-lg">
               {/* Header */}
               <div className="text-center py-4 border-b font-medium">Command Terminal</div>
 
