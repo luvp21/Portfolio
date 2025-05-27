@@ -72,7 +72,7 @@ export function ExperienceTimeline() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 hide-scrollbar">
       {experiences.map((exp) => (
         <motion.div
           key={exp.id}

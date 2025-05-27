@@ -7,7 +7,7 @@ import { User, Briefcase, History, FileText, Layers, Award } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-type PanelType = "about" | "projects" | "experience" | "resume" | "stack" | "achievements"
+type PanelType = "about" | "projects" | "experience" | "message" | "stack" | "achievements"
 
 interface DockProps {
   onOpenPanel: (panel: PanelType) => void
@@ -25,7 +25,7 @@ const DOCK_ITEMS: {
   { panel: "about", icon: User, label: "About" },
   { panel: "projects", icon: Briefcase, label: "Projects" },
   { panel: "experience", icon: History, label: "Experience" },
-  { panel: "resume", icon: FileText, label: "Message Constellation" },
+  { panel: "message", icon: FileText, label: "Message Constellation" },
   { panel: "achievements", icon: Award, label: "Achievements" },
   { panel: "stack", icon: Layers, label: "Tech Stack" },
 ]
@@ -33,12 +33,12 @@ const DOCK_ITEMS: {
 export function Dock({ onOpenPanel, activePanels }: DockProps) {
   return (
     <motion.div
-      className="fixed left-0 right-0 bottom-5 mx-auto z-[9999] flex justify-center"
+      className=" left-0 right-0 mx-auto z-[9999] flex justify-center"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div className="bg-background backdrop-blur-lg border border-muted/30 rounded-full shadow-lg px-4 py-2 hide-scrollbar max-w-full">
+      <div className="bg-background backdrop-blur-lg border border-muted/30 rounded-full shadow-lg px-4 py-2 mb-2 hide-scrollbar max-w-full">
         <TooltipProvider>
           <div className="flex items-center gap-2 min-w-max">
             {DOCK_ITEMS.map(({ panel, icon: Icon, label, shortcut }) => (
@@ -50,7 +50,7 @@ export function Dock({ onOpenPanel, activePanels }: DockProps) {
                     className="h-9 w-9 rounded-full"
                     onClick={() => onOpenPanel(panel)}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

@@ -53,7 +53,7 @@ export function AchievementsCard() {
   }
 
   return (
-    <div className="p-4 h-full overflow-y-auto">
+    <div className="p-4 h-full overflow-y-auto hide-scrollbar ">
 
       <div className="space-y-3">
         {achievements.map((achievement) => (
