@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTheme } from "@/components/theme-provider"
 
 interface CommandBarProps {
   open: boolean
@@ -41,15 +42,29 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
   const [inputValue, setInputValue] = useState("")
   const [commandHistory, setCommandHistory] = useState<CommandHistoryItem[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+  const [isMobile, setIsMobile] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const historyRef = useRef<HTMLDivElement | null>(null)
+  const { theme } = useTheme()
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
 
   // Available commands - removed blog, theme, and project-specific commands
   const navigationCommands = ["about", "projects", "experience", "Message", "achievements", "stack"]
   const appearanceCommands = ["dark", "light"]
   const toolsCommands = ["reset"]
   const socialCommands = ["github", "linkedin", "twitter", "email"]
-  const messageCommands = ["addmessage", "viewmessages", "constellation"]
+  // const messageCommands = ["addmessage", "viewmessages", "constellation"]
   const systemCommands = ["help", "clear", "close", "downloadcv"]
 
   // All commands
@@ -58,7 +73,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     ...appearanceCommands,
     ...toolsCommands,
     ...socialCommands,
-    ...messageCommands,
+    // ...messageCommands,
     ...systemCommands,
   ]
 
@@ -87,9 +102,9 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     email: "Send me an email",
 
     // Message Constellation
-    addmessage: "Add a message to the constellation",
-    viewmessages: "View all constellation messages",
-    constellation: "Open the message constellation",
+    // addmessage: "Add a message to the constellation",
+    // viewmessages: "View all constellation messages",
+    // constellation: "Open the message constellation",
 
     // System
     help: "Show available commands",
@@ -215,22 +230,21 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
       let url = ""
       switch (value) {
         case "github":
-          url = "https://github.com/luvp21" 
+          url = "https://github.com/luvp21"
           break
         case "linkedin":
-          url = "https://linkedin.com/in/luvv" 
+          url = "https://linkedin.com/in/luvv"
           break
         case "twitter":
-          url = "https://twitter.com/luvp_21" 
+          url = "https://twitter.com/luvp_21"
           break
         case "email":
-          url = "mailto:luvvvpatel@email.com" 
+          url = "mailto:luvvvpatel@email.com"
           break
       }
       window.open(url, "_blank")
       addToHistory(`Opening ${value}...`, false)
     } else if (value === "downloadcv") {
-      
       window.open("/luv.pdf", "_blank")
       addToHistory("Downloading CV...", false)
     } else {
@@ -358,11 +372,15 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
 
   // Render help content with terminal-style formatting
   const renderHelpContent = () => {
+    const accentColor = theme === "dark" ? "#A374FF" : "hsl(var(--name))"
+
     return (
       <div className="p-2 text-sm rounded">
         <div className="flex items-center text-muted-foreground mb-3">
           <span className="mr-2 font-mono">{">"}</span>
-          <span className="mr-1 text-[#A374FF]">_</span>
+          <span className="mr-1" style={{ color: accentColor }}>
+            _
+          </span>
           <span>help</span>
         </div>
 
@@ -418,7 +436,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
           </div>
         </div>
 
-        <div className="mb-3">
+        {/* <div className="mb-3">
           <div className="text-xs font-medium text-muted-foreground mb-1">Message Constellation</div>
           <div className="grid grid-cols-1 gap-1">
             {messageCommands.map((cmd) => (
@@ -429,7 +447,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         <div className="mb-3">
           <div className="text-xs font-medium text-muted-foreground mb-1">System</div>
@@ -449,6 +467,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
 
   // Get suggestions to display
   const suggestions = getSuggestions()
+  const accentColor = theme === "dark" ? "#A374FF" : "hsl(var(--name))"
 
   return (
     <AnimatePresence>
@@ -461,7 +480,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
           onClick={() => onOpenChange(false)}
         >
           <motion.div
-            className="w-full max-w-sm h-full bg-background shadow-lg rounded-lg overflow-hidden flex flex-col"
+            className="w-full max-w-sm h-full bg-background shadow-lg rounded-lg overflow-hidden flex flex-col border"
             initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
@@ -470,7 +489,16 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
           >
             <div className="flex flex-col h-full rounded-lg">
               {/* Header */}
-              <div className="text-center py-4 border-b font-medium">Command Terminal</div>
+              <div className="flex items-center justify-between px-4 py-4 border-b">
+                <div className="font-medium text-foreground">Command Terminal</div>
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="p-1 hover:bg-accent rounded-md transition-colors"
+                  aria-label="Close command terminal"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
               {/* Command input */}
               <div className="px-4 py-3 border-b">
@@ -490,11 +518,11 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
               {/* Instruction text or suggestions */}
               <div className="px-4 py-3 border-b">
                 {inputValue === "" ? (
-                  <div className="text-sm text-muted-foreground">Start typing and see where it leads you...</div>
+                  <div className="text-sm text-muted-foreground">Start typing and see where it leads you... Or just type help</div>
                 ) : suggestions.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {suggestions.map((cmd, index) => (
-                      <span key={index} className="text-sm bg-background/50 px-2 py-1 rounded">
+                      <span key={index} className="text-sm bg-accent/50 px-2 py-1 rounded text-foreground">
                         {cmd}
                       </span>
                     ))}
@@ -512,19 +540,16 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
                       {item.type === "command" ? (
                         <div className="flex items-center text-muted-foreground">
                           <span className="mr-2 font-mono">{">"}</span>
-                          <span className="text-[#A374FF]">_</span>
-                          <span>{item.content}</span>
+                          <span style={{ color: accentColor }}>_</span>
+                          <span className="text-foreground">{item.content}</span>
                         </div>
                       ) : (
-                        <div className="pl-5">{item.content}</div>
+                        <div className="pl-5 text-foreground">{item.content}</div>
                       )}
                     </div>
                   ))}
                 </div>
-              )}
-
-              {/* Footer */}
-              <div className="px-4 py-2 border-t text-xs text-center text-muted-foreground">ESC to close</div>
+              )}              
             </div>
           </motion.div>
         </motion.div>

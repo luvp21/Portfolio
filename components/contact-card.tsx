@@ -1,37 +1,28 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Mail, Github, Linkedin, Twitter, Coffee, Phone, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useTheme } from "@/components/theme-provider"
 
 export function ContactCard() {
   const [isFlipped, setIsFlipped] = useState(false)
   const [showCoffeeForm, setShowCoffeeForm] = useState(false)
-  // const [cardRotation, setCardRotation] = useState({ x: 0, y: 0 })
+  const { theme } = useTheme()
 
-  // const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-  //   const card = e.currentTarget
-  //   const rect = card.getBoundingClientRect()
-  //   const x = e.clientX - rect.left
-  //   const y = e.clientY - rect.top
+  const cardBackground =
+    theme === "dark"
+      ? "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)"
+      : "linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 100%)"
 
-  //   const centerX = rect.width / 2
-  //   const centerY = rect.height / 2
+  const cardShadow = theme === "dark" ? "0 8px 32px 0 rgba(31, 38, 135, 0.37)" : "0 8px 32px 0 rgba(0, 0, 0, 0.1)"
 
-  //   const rotateY = ((x - centerX) / centerX) * 15
-  //   const rotateX = ((centerY - y) / centerY) * 15
+  const cardBorder = theme === "dark" ? "1px solid rgba(255, 255, 255, 0.18)" : "1px solid rgba(0, 0, 0, 0.1)"
 
-  //   setCardRotation({ x: rotateX, y: rotateY })
-  // }
-
-  // const resetCardRotation = () => {
-  //   setCardRotation({ x: 0, y: 0 })
-  // }
+  const decorativeColor = theme === "dark" ? "rgba(163, 116, 255, 0.1)" : "rgba(124, 58, 237, 0.1)"
 
   return (
     <div className="relative w-full h-[300px] perspective">
@@ -54,36 +45,44 @@ export function ContactCard() {
               damping: 30,
             }}
             style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
-              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+              background: cardBackground,
+              boxShadow: cardShadow,
               backdropFilter: "blur(4px)",
-              border: "1px solid rgba(255, 255, 255, 0.18)",
+              border: cardBorder,
             }}
           >
             <div className="flex justify-between items-start h-full">
-
-              <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-primary/10 opacity-50"></div>
-              <div className="absolute bottom-4 left-4 w-8 h-8 rounded-full bg-primary/10 opacity-50"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full bg-primary/5 opacity-30"></div>
+              <div
+                className="absolute top-4 right-4 w-12 h-12 rounded-full opacity-50"
+                style={{ backgroundColor: decorativeColor }}
+              ></div>
+              <div
+                className="absolute bottom-4 left-4 w-8 h-8 rounded-full opacity-50"
+                style={{ backgroundColor: decorativeColor }}
+              ></div>
+              <div
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full opacity-30"
+                style={{ backgroundColor: decorativeColor }}
+              ></div>
               {/* Left side - Personal Info */}
               <div className="flex flex-col justify-between h-full">
                 <div>
-                  <h3 className="text-xl font-bold mb-1">Luv Patel</h3>
+                  <h3 className="text-xl font-bold mb-1 text-foreground">Luv Patel</h3>
                   <p className="text-muted-foreground mb-4">Full-Stack Developer</p>
                 </div>
 
                 <div className="grid gap-2">
                   <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-primary" />
-                    <span className="text-sm">+91 6355961895</span>
+                    <Phone className="w-4 h-4 text-name" />
+                    <span className="text-sm text-foreground">+91 6355961895</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-primary" />
-                    <span className="text-sm">luvp2112@gmail.com</span>
+                    <Mail className="w-4 h-4 text-name" />
+                    <span className="text-sm text-foreground">luvp2112@gmail.com</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm">India</span>
+                    <MapPin className="w-4 h-4 text-name" />
+                    <span className="text-sm text-foreground">India</span>
                   </div>
                 </div>
               </div>
@@ -120,9 +119,6 @@ export function ContactCard() {
                 </div>
               </div>
             </div>
-
-            {/* Decorative elements */}
-            
           </motion.div>
         ) : (
           <motion.div
@@ -142,13 +138,13 @@ export function ContactCard() {
               damping: 30,
             }}
             style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
-              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+              background: cardBackground,
+              boxShadow: cardShadow,
               backdropFilter: "blur(4px)",
-              border: "1px solid rgba(255, 255, 255, 0.18)",
+              border: cardBorder,
             }}
           >
-            <h3 className="text-xl font-bold mb-4">Send a Message</h3>
+            <h3 className="text-xl font-bold mb-4 text-foreground">Send a Message</h3>
             <form className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -170,8 +166,14 @@ export function ContactCard() {
             </form>
 
             {/* Decorative elements */}
-            <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-primary/10 opacity-50"></div>
-            <div className="absolute bottom-4 left-4 w-8 h-8 rounded-full bg-primary/10 opacity-50"></div>
+            <div
+              className="absolute top-4 right-4 w-12 h-12 rounded-full opacity-50"
+              style={{ backgroundColor: decorativeColor }}
+            ></div>
+            <div
+              className="absolute bottom-4 left-4 w-8 h-8 rounded-full opacity-50"
+              style={{ backgroundColor: decorativeColor }}
+            ></div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -187,12 +189,12 @@ export function ContactCard() {
             onClick={() => setShowCoffeeForm(false)}
           >
             <motion.div
-              className="bg-background rounded-lg shadow-lg p-6 max-w-md w-full"
+              className="bg-background rounded-lg shadow-lg p-6 max-w-md w-full border"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-2 mb-4">
-                <Coffee className="w-5 h-5 text-primary" />
-                <h3 className="text-xl font-bold">Schedule a Coffee Chat</h3>
+                <Coffee className="w-5 h-5 text-name" />
+                <h3 className="text-xl font-bold text-foreground">Schedule a Coffee Chat</h3>
               </div>
               <p className="text-muted-foreground mb-4">
                 Let's grab a virtual coffee and discuss your project ideas or just chat about tech!
