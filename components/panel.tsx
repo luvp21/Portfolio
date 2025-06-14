@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { motion, type PanInfo, useMotionValue } from "framer-motion"
-import { X, Minimize2, CornerRightDown, Pin, PinOff } from "lucide-react"
+import { X, Minimize2, Pin, PinOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -26,7 +26,7 @@ interface PanelProps {
   defaultHeight?: number
   isPinned?: boolean
   onPinChange?: (isPinned: boolean) => void
-  dragConstraints?: Partial<DOMRect> | React.RefObject<HTMLDivElement | null>;
+  canvasBoundaries: { width: number; height: number }
 }
 
 export function Panel({
@@ -47,7 +47,7 @@ export function Panel({
   defaultHeight = 400,
   isPinned = false,
   onPinChange,
-  dragConstraints,
+  canvasBoundaries,
 }: PanelProps) {
   const [isResizing, setIsResizing] = useState(false)
   const [size, setSize] = useState({ width: defaultWidth, height: defaultHeight })
@@ -63,6 +63,32 @@ export function Panel({
     x.set(position.x)
     y.set(position.y)
   }, [position.x, position.y, x, y])
+
+  // Ensure panel is within canvas boundaries when canvas size changes
+  useEffect(() => {
+    if (canvasBoundaries) {
+      const currentX = x.get()
+      const currentY = y.get()
+
+      // Calculate boundaries
+      const maxX = canvasBoundaries.width - size.width
+      const maxY = canvasBoundaries.height - size.height
+
+      // Constrain position
+      const constrainedX = Math.max(0, Math.min(currentX, maxX))
+      const constrainedY = Math.max(0, Math.min(currentY, maxY))
+
+      // Update position if needed
+      if (currentX !== constrainedX || currentY !== constrainedY) {
+        x.set(constrainedX)
+        y.set(constrainedY)
+
+        if (onPositionChange) {
+          onPositionChange(constrainedX, constrainedY)
+        }
+      }
+    }
+  }, [canvasBoundaries, size, x, y, onPositionChange])
 
   const handleDragStart = () => {
     if (isPinned) return
@@ -91,6 +117,13 @@ export function Panel({
       newX = Math.round(newX / gridSize) * gridSize
       newY = Math.round(newY / gridSize) * gridSize
     }
+
+    // Constrain to canvas boundaries
+    const maxX = canvasBoundaries.width - size.width
+    const maxY = canvasBoundaries.height - size.height
+
+    newX = Math.max(0, Math.min(newX, maxX))
+    newY = Math.max(0, Math.min(newY, maxY))
 
     x.set(newX)
     y.set(newY)
@@ -131,7 +164,12 @@ export function Panel({
       drag={!isPinned && !isResizing}
       dragMomentum={true}
       dragElastic={0.1}
-      dragConstraints={dragConstraints}
+      dragConstraints={{
+        left: 0,
+        top: 0,
+        right: canvasBoundaries.width - size.width,
+        bottom: canvasBoundaries.height - size.height,
+      }}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       whileDrag={{ scale: isPinned ? 1 : 1.02 }}
@@ -173,8 +211,9 @@ export function Panel({
       </div>
 
       {/* Panel Content */}
-      <div className={cn("h-[calc(100%-3rem)] overflow-y-scroll hide-scrollbar", isMinimized && "hidden")}>{children}</div>
-
+      <div className={cn("h-[calc(100%-3rem)] overflow-y-scroll hide-scrollbar", isMinimized && "hidden")}>
+        {children}
+      </div>
     </motion.div>
   )
 }

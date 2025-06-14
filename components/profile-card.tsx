@@ -73,15 +73,10 @@ export function ProfileCard() {
 
           <div className="flex flex-wrap gap-3 ">
             {tags.map((tag, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.08 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="flex items-center gap-2 py-1 rounded-full text-muted-foreground bg-muted/10"
-              >
+              <div className="flex items-center gap-2 py-1 rounded-full text-muted-foreground bg-muted/10">
                 {tag.icon}
                 <span className="text-sm font-medium">{tag.text}</span>
-              </motion.div>
+              </div>
             ))}
           </div>
 

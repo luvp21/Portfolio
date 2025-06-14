@@ -52,16 +52,20 @@ export function ProjectCard({ title, description, tags, image, githubUrl, liveUr
 
         <div className="flex gap-2">
           {githubUrl && (
-            <Button variant="outline" size="sm" className="w-full">
-              <Github className="mr-1 h-3 w-3" />
-              Code
-            </Button>
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="w-full">
+              <Button variant="outline" size="sm" className="w-full rounded-lg ">
+                <Github className="mr-1 h-3 w-3" />
+                Code
+              </Button>
+            </a>
           )}
           {liveUrl && (
-            <Button variant="outline" size="sm" className="w-full">
-              <ExternalLink className="mr-1 h-3 w-3" />
-              Demo
-            </Button>
+            <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="w-full">
+              <Button variant="outline" size="sm" className="w-full">
+                <ExternalLink className="mr-1 h-3 w-3" />
+                Demo
+              </Button>
+            </a>
           )}
         </div>
       </div>
