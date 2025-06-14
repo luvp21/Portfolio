@@ -531,18 +531,22 @@ export default function PortfolioInterface() {
                     description="A canvas-based portfolio with draggable panels and Command Terminal"
                     tags={["Next.js", "Framer Motion", "Tailwind"]}
                     image="/portfolio.png"
+                    githubUrl="https://github.com/luvp21/Portfolio"
+                    liveUrl="https://portfolio-luvp21s-projects.vercel.app/"
                   />
                   <ProjectCard
                     title="EV Rental Website"
                     description="EV rental system with secure KYC, real-time tracking, and automated payments."
                     tags={["React", "Tailwind"]}
                     image="/erental.png"
+                    githubUrl="https://github.com/mihir1816/Deep-Drillers-2.0"
                   />
                   <ProjectCard
                     title="Excalidraw Clone"
                     description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
                     tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
                     image="/excalidraw.png"
+                    githubUrl="https://github.com/luvp21/Draw-App"
                   />
                 </div>,
                 "800px",

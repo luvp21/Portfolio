@@ -446,7 +446,7 @@ export function Sandbox() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className={`absolute z-20 rounded-lg p-3 shadow-lg border ${
+            className={`absolute z-[9999] rounded-lg p-3 shadow-lg border ${
               isMobile ? "max-w-[280px] pointer-events-auto" : "max-w-xs pointer-events-none"
             }`}
             style={{
