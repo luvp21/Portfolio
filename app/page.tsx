@@ -501,60 +501,62 @@ export default function PortfolioInterface() {
       <div className="relative flex-1 overflow-hidden">
         {/* Mobile Layout */}
         {isMobile ? (
-          <div className="pt-4 pb-20 space-y-4 p-4">
-            {renderMobilePanel("about", "About Me", <User className="h-4 w-4" />, <ProfileCard />, "500px")}
-            {renderMobilePanel("stack", "Tech Stack", <Layers className="h-4 w-4" />, <TechStack />, "500px")}
-            {renderMobilePanel(
-              "achievements",
-              "Achievements",
-              <Award className="h-4 w-4" />,
-              <AchievementsCard />,
-              "500px",
-            )}
-            {renderMobilePanel(
-              "experience",
-              "Experience",
-              <History className="h-4 w-4" />,
-              <div className="max-h-[600px] overflow-y-auto">
-                <ExperienceTimeline />
-              </div>,
-              "600px",
-            )}
-            {renderMobilePanel(
-              "projects",
-              "Projects",
-              <Briefcase className="h-4 w-4" />,
-              <div className="space-y-4 max-h-[800px] overflow-y-auto p-2">
-                <ProjectCard
-                  title="Interactive Portfolio"
-                  description="A canvas-based portfolio with draggable panels and Command Terminal"
-                  tags={["Next.js", "Framer Motion", "Tailwind"]}
-                  image="/portfolio.png"
-                />
-                <ProjectCard
-                  title="EV Rental Website"
-                  description="EV rental system with secure KYC, real-time tracking, and automated payments."
-                  tags={["React", "Tailwind"]}
-                  image="/erental.png"
-                />
-                <ProjectCard
-                  title="Excalidraw Clone"
-                  description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
-                  tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
-                  image="/excalidraw.png"
-                />
-              </div>,
-              "800px",
-            )}
-            {renderMobilePanel(
-              "message",
-              "Message Constellation",
-              <FileText className="h-4 w-4" />,
-              <div className="h-[300px] sm:h-[400px]">
-                <Sandbox />
-              </div>,
-              "500px",
-            )}
+          <div className="h-full overflow-y-auto">
+            <div className="min-h-full pt-4 pb-20 space-y-4 p-4">
+              {renderMobilePanel("about", "About Me", <User className="h-4 w-4" />, <ProfileCard />, "500px")}
+              {renderMobilePanel("stack", "Tech Stack", <Layers className="h-4 w-4" />, <TechStack />, "500px")}
+              {renderMobilePanel(
+                "achievements",
+                "Achievements",
+                <Award className="h-4 w-4" />,
+                <AchievementsCard />,
+                "500px",
+              )}
+              {renderMobilePanel(
+                "experience",
+                "Experience",
+                <History className="h-4 w-4" />,
+                <div className="max-h-[600px] overflow-y-auto">
+                  <ExperienceTimeline />
+                </div>,
+                "600px",
+              )}
+              {renderMobilePanel(
+                "projects",
+                "Projects",
+                <Briefcase className="h-4 w-4" />,
+                <div className="space-y-4 max-h-[800px] overflow-y-auto p-2">
+                  <ProjectCard
+                    title="Interactive Portfolio"
+                    description="A canvas-based portfolio with draggable panels and Command Terminal"
+                    tags={["Next.js", "Framer Motion", "Tailwind"]}
+                    image="/portfolio.png"
+                  />
+                  <ProjectCard
+                    title="EV Rental Website"
+                    description="EV rental system with secure KYC, real-time tracking, and automated payments."
+                    tags={["React", "Tailwind"]}
+                    image="/erental.png"
+                  />
+                  <ProjectCard
+                    title="Excalidraw Clone"
+                    description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
+                    tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
+                    image="/excalidraw.png"
+                  />
+                </div>,
+                "800px",
+              )}
+              {renderMobilePanel(
+                "message",
+                "Message Constellation",
+                <FileText className="h-4 w-4" />,
+                <div className="h-[300px] sm:h-[400px]">
+                  <Sandbox />
+                </div>,
+                "500px",
+              )}
+            </div>
           </div>
         ) : (
           /* Desktop Layout - Canvas with Scrolling (Hidden Scrollbars) */

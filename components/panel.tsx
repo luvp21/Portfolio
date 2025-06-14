@@ -52,11 +52,14 @@ export function Panel({
   const [isResizing, setIsResizing] = useState(false)
   const [size, setSize] = useState({ width: defaultWidth, height: defaultHeight })
   const [isDragging, setIsDragging] = useState(false)
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 })
+  const [initialPanelPos, setInitialPanelPos] = useState({ x: 0, y: 0 })
 
   const x = useMotionValue(position.x)
   const y = useMotionValue(position.y)
 
   const panelRef = useRef<HTMLDivElement>(null)
+  const titleBarRef = useRef<HTMLDivElement>(null)
 
   // Update motion values when position prop changes
   useEffect(() => {
@@ -90,49 +93,73 @@ export function Panel({
     }
   }, [canvasBoundaries, size, x, y, onPositionChange])
 
-  const handleDragStart = () => {
+  // Handle mouse down on title bar
+  const handleTitleBarMouseDown = (e: React.MouseEvent) => {
     if (isPinned) return
+    
+    // Only start dragging if clicking on the title bar itself, not on buttons
+    const target = e.target as HTMLElement
+    if (target.closest('button')) return
+
     setIsDragging(true)
+    setDragStartPos({ x: e.clientX, y: e.clientY })
+    setInitialPanelPos({ x: x.get(), y: y.get() })
+    
     if (onFocus) onFocus()
+    e.preventDefault()
+    e.stopPropagation()
   }
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (isPinned) return
-    setIsDragging(false)
+  // Handle mouse move for dragging
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || isPinned) return
 
-    // Add some inertia
-    const decay = 0.95
-    const velocity = { x: info.velocity.x * decay, y: info.velocity.y * decay }
+      const deltaX = e.clientX - dragStartPos.x
+      const deltaY = e.clientY - dragStartPos.y
 
-    // Update position with inertia
-    const currentX = x.get()
-    const currentY = y.get()
+      let newX = initialPanelPos.x + deltaX
+      let newY = initialPanelPos.y + deltaY
 
-    let newX = currentX + velocity.x
-    let newY = currentY + velocity.y
+      // Apply grid snapping if enabled
+      if (isGridSnap) {
+        const gridSize = 20
+        newX = Math.round(newX / gridSize) * gridSize
+        newY = Math.round(newY / gridSize) * gridSize
+      }
 
-    // Apply grid snapping if enabled
-    if (isGridSnap) {
-      const gridSize = 20
-      newX = Math.round(newX / gridSize) * gridSize
-      newY = Math.round(newY / gridSize) * gridSize
+      // Constrain to canvas boundaries
+      const maxX = canvasBoundaries.width - size.width
+      const maxY = canvasBoundaries.height - size.height
+
+      newX = Math.max(0, Math.min(newX, maxX))
+      newY = Math.max(0, Math.min(newY, maxY))
+
+      x.set(newX)
+      y.set(newY)
     }
 
-    // Constrain to canvas boundaries
-    const maxX = canvasBoundaries.width - size.width
-    const maxY = canvasBoundaries.height - size.height
-
-    newX = Math.max(0, Math.min(newX, maxX))
-    newY = Math.max(0, Math.min(newY, maxY))
-
-    x.set(newX)
-    y.set(newY)
-
-    // Notify parent of position change
-    if (onPositionChange) {
-      onPositionChange(newX, newY)
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false)
+        
+        // Notify parent of final position
+        if (onPositionChange) {
+          onPositionChange(x.get(), y.get())
+        }
+      }
     }
-  }
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isDragging, dragStartPos, initialPanelPos, x, y, onPositionChange, isPinned, isGridSnap, canvasBoundaries, size])
 
   const handlePanelClick = () => {
     if (onFocus) onFocus()
@@ -149,7 +176,6 @@ export function Panel({
       ref={panelRef}
       className={cn(
         "bg-card rounded-lg shadow-lg overflow-hidden absolute",
-        isDragging && !isPinned && "cursor-grabbing",
         isMinimized && "h-12 overflow-hidden",
         isPinned && "border-2 border-primary/30",
         className,
@@ -161,31 +187,24 @@ export function Panel({
         width: isMinimized ? "auto" : size.width,
         height: isMinimized ? "auto" : size.height,
       }}
-      drag={!isPinned && !isResizing}
-      dragMomentum={true}
-      dragElastic={0.1}
-      dragConstraints={{
-        left: 0,
-        top: 0,
-        right: canvasBoundaries.width - size.width,
-        bottom: canvasBoundaries.height - size.height,
-      }}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      whileDrag={{ scale: isPinned ? 1 : 1.02 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ 
+        opacity: 1, 
+        scale: isDragging && !isPinned ? 1.02 : 1 
+      }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       id={id}
       onClick={handlePanelClick}
     >
-      {/* Panel Header */}
+      {/* Panel Header - Draggable Area */}
       <div
+        ref={titleBarRef}
         className={cn(
           "flex items-center justify-between p-3 bg-muted/50 border-b",
-          !isPinned && "cursor-grab",
+          !isPinned && "cursor-grab select-none",
           isDragging && !isPinned && "cursor-grabbing",
         )}
+        onMouseDown={handleTitleBarMouseDown}
       >
         <div className="flex items-center gap-2">
           {icon && <span className="text-muted-foreground">{icon}</span>}
@@ -210,7 +229,7 @@ export function Panel({
         </div>
       </div>
 
-      {/* Panel Content */}
+      {/* Panel Content - Non-draggable */}
       <div className={cn("h-[calc(100%-3rem)] overflow-y-scroll hide-scrollbar", isMinimized && "hidden")}>
         {children}
       </div>

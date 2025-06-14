@@ -42,9 +42,22 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
   const [inputValue, setInputValue] = useState("")
   const [commandHistory, setCommandHistory] = useState<CommandHistoryItem[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
+  const [isMobile, setIsMobile] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const historyRef = useRef<HTMLDivElement | null>(null)
   const { theme } = useTheme()
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
 
   // Available commands - removed blog, theme, and project-specific commands
   const navigationCommands = ["about", "projects", "experience", "Message", "achievements", "stack"]
@@ -476,7 +489,16 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
           >
             <div className="flex flex-col h-full rounded-lg">
               {/* Header */}
-              <div className="text-center py-4 border-b font-medium text-foreground">Command Terminal</div>
+              <div className="flex items-center justify-between px-4 py-4 border-b">
+                <div className="font-medium text-foreground">Command Terminal</div>
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="p-1 hover:bg-accent rounded-md transition-colors"
+                  aria-label="Close command terminal"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
               {/* Command input */}
               <div className="px-4 py-3 border-b">
@@ -496,7 +518,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
               {/* Instruction text or suggestions */}
               <div className="px-4 py-3 border-b">
                 {inputValue === "" ? (
-                  <div className="text-sm text-muted-foreground">Start typing and see where it leads you...</div>
+                  <div className="text-sm text-muted-foreground">Start typing and see where it leads you... Or just type help</div>
                 ) : suggestions.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {suggestions.map((cmd, index) => (
@@ -527,10 +549,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
                     </div>
                   ))}
                 </div>
-              )}
-
-              {/* Footer */}
-              <div className="px-4 py-2 border-t text-xs text-center text-muted-foreground">ESC to close</div>
+              )}              
             </div>
           </motion.div>
         </motion.div>
