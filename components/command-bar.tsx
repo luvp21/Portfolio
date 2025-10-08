@@ -189,15 +189,19 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     }
   }
 
-  const addToHistory = (command: string, isCommand = true) => {
-    // Don't add duplicates in a row
+  const addToHistory = (command: string | React.ReactNode, isCommand = true) => {
+    // Don't add duplicates in a row (only check for string commands)
     if (
-      commandHistory.length === 0 ||
-      commandHistory[commandHistory.length - 1].content !== command ||
-      commandHistory[commandHistory.length - 1].type !== "command"
+      typeof command === 'string' &&
+      commandHistory.length > 0 &&
+      typeof commandHistory[commandHistory.length - 1].content === 'string' &&
+      commandHistory[commandHistory.length - 1].content === command &&
+      commandHistory[commandHistory.length - 1].type === "command"
     ) {
-      setCommandHistory([...commandHistory, { type: isCommand ? "command" : "response", content: command }])
+      return
     }
+    
+    setCommandHistory(prev => [...prev, { type: isCommand ? "command" : "response", content: command }])
     setHistoryIndex(-1)
   }
 
@@ -245,7 +249,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
       window.open(url, "_blank")
       addToHistory(`Opening ${value}...`, false)
     } else if (value === "downloadcv") {
-      window.open("/luv.pdf", "_blank")
+      window.open("/Luv.pdf", "_blank")
       addToHistory("Downloading CV...", false)
     } else {
       // Execute regular command
@@ -283,7 +287,10 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
       if (commandsOnly.length > 0) {
         const newIndex = historyIndex < commandsOnly.length - 1 ? historyIndex + 1 : historyIndex
         setHistoryIndex(newIndex)
-        setInputValue(commandsOnly[commandsOnly.length - 1 - newIndex])
+        const commandIndex = commandsOnly.length - 1 - newIndex
+        if (commandIndex >= 0 && commandIndex < commandsOnly.length) {
+          setInputValue(commandsOnly[commandIndex])
+        }
       }
     } else if (e.key === "ArrowDown") {
       e.preventDefault()
@@ -291,7 +298,10 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
       if (historyIndex > 0) {
         const newIndex = historyIndex - 1
         setHistoryIndex(newIndex)
-        setInputValue(commandsOnly[commandsOnly.length - 1 - newIndex])
+        const commandIndex = commandsOnly.length - 1 - newIndex
+        if (commandIndex >= 0 && commandIndex < commandsOnly.length) {
+          setInputValue(commandsOnly[commandIndex])
+        }
       } else if (historyIndex === 0) {
         setHistoryIndex(-1)
         setInputValue("")
@@ -371,7 +381,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
   }
 
   // Render help content with terminal-style formatting
-  const renderHelpContent = () => {
+  const renderHelpContent = (): React.ReactNode => {
     const accentColor = theme === "dark" ? "#A374FF" : "hsl(var(--name))"
 
     return (
@@ -435,19 +445,6 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
             ))}
           </div>
         </div>
-
-        {/* <div className="mb-3">
-          <div className="text-xs font-medium text-muted-foreground mb-1">Message Constellation</div>
-          <div className="grid grid-cols-1 gap-1">
-            {messageCommands.map((cmd) => (
-              <div key={cmd} className="flex items-center">
-                {getCommandIcon(cmd)}
-                <span className="ml-2 mr-2">{cmd}</span>
-                <span className="text-xs text-muted-foreground">- {commandDescriptions[cmd]}</span>
-              </div>
-            ))}
-          </div>
-        </div> */}
 
         <div className="mb-3">
           <div className="text-xs font-medium text-muted-foreground mb-1">System</div>
