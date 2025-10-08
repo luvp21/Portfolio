@@ -49,8 +49,10 @@ export function Dock({ onOpenPanel, activePanels }: DockProps) {
                     size="icon"
                     className="h-9 w-9 rounded-full"
                     onClick={() => onOpenPanel(panel)}
+                    aria-label={`Open ${label} panel`}
+                    aria-pressed={activePanels.includes(panel)}
                   >
-                    <Icon className="h-3 w-3" />
+                    <Icon className="h-3 w-3" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

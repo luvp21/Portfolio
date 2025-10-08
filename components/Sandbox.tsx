@@ -1,9 +1,9 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { Plus, X, MessageSquare, Info } from "lucide-react"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
@@ -100,7 +100,7 @@ const useResponsiveDimensions = () => {
   return dimensions
 }
 
-export function Sandbox() {
+export const Sandbox = React.memo(function Sandbox() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -116,6 +116,13 @@ export function Sandbox() {
 
   const { width, height, isMobile, isTablet } = useResponsiveDimensions()
 
+  // Responsive star sizes
+  const starSize = useMemo(() => {
+    if (isMobile) return { outer: 12, inner: 6, top: 3, left: 3 }
+    if (isTablet) return { outer: 14, inner: 7, top: 3.5, left: 3.5 }
+    return { outer: 16, inner: 8, top: 4, left: 4 }
+  }, [isMobile, isTablet])
+
   // Smart tooltip positioning with container bounds
   const { position, tooltipRef } = useSmartTooltip(
     !!hoveredMessage,
@@ -125,15 +132,15 @@ export function Sandbox() {
   )
 
   // Use theme-aware colors
-  const getRandomColor = () => {
+  const getRandomColor = useCallback(() => {
     const lightColors = ["#fffff3", "#A374FF"]
     const darkColors = ["#fffff3", "#A374FF"]
     const colors = theme === "dark" ? darkColors : lightColors
     return colors[Math.floor(Math.random() * colors.length)]
-  }
+  }, [theme])
 
   // Fetch messages from Supabase
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const { data, error } = await supabase.from("messages").select("*").order("created_at", { ascending: false })
 
@@ -146,7 +153,7 @@ export function Sandbox() {
     } catch (error) {
       console.error("Error fetching messages:", error)
     }
-  }
+  }, [])
 
   // Add a new message
   const addMessage = async (e: React.FormEvent) => {
@@ -158,7 +165,7 @@ export function Sandbox() {
         description: "Please provide both your name and a message.",
         variant: "destructive",
       })
-      return
+      return                                                                                                                                                                                                                                                
     }
 
     setIsLoading(true)
@@ -173,7 +180,7 @@ export function Sandbox() {
       const y_position = Math.random() * (containerHeight - margin * 2) + margin
       const color = getRandomColor()
 
-      const { data, error } = await supabase
+      const { data, error } = await supabase                                                                                                                                     
         .from("messages")
         .insert([{ name, message, x_position, y_position, color }])
         .select()
@@ -260,7 +267,7 @@ export function Sandbox() {
   }, [particles, width, height])
 
   // Draw stars and connections on canvas
-  const drawStars = () => {
+  const drawStars = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !containerRef.current) return
 
@@ -292,6 +299,7 @@ export function Sandbox() {
     ctx.lineWidth = 0.8
 
     const connectionDistance = isMobile ? 150 : isTablet ? 200 : 250
+    const starCenterOffset = starSize.outer / 2 // Offset to center of star
 
     for (let i = 0; i < messages.length; i++) {
       for (let j = i + 1; j < messages.length; j++) {
@@ -301,8 +309,14 @@ export function Sandbox() {
         )
 
         if (distance < connectionDistance) {
-          ctx.moveTo(messages[i].x_position, messages[i].y_position)
-          ctx.lineTo(messages[j].x_position, messages[j].y_position)
+          // Connect to the center of each star
+          const centerX1 = messages[i].x_position + starCenterOffset
+          const centerY1 = messages[i].y_position + starCenterOffset
+          const centerX2 = messages[j].x_position + starCenterOffset
+          const centerY2 = messages[j].y_position + starCenterOffset
+          
+          ctx.moveTo(centerX1, centerY1)
+          ctx.lineTo(centerX2, centerY2)
         }
       }
     }
@@ -332,30 +346,17 @@ export function Sandbox() {
       ctx.fillStyle = color
       ctx.fill()
     }
-  }
+  }, [messages, theme, isMobile, isTablet, starSize])
 
   // Initialize and handle window resize
   useEffect(() => {
     fetchMessages()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Redraw stars when messages or dimensions change
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      drawStars()
-    }, 100) // Small delay to ensure container dimensions are updated
-
-    return () => clearTimeout(timeoutId)
-  }, [messages, width, height, isMobile, isTablet, theme])
-
-  // Responsive star sizes
-  const getStarSize = () => {
-    if (isMobile) return { outer: 12, inner: 6, top: 3, left: 3 }
-    if (isTablet) return { outer: 14, inner: 7, top: 3.5, left: 3.5 }
-    return { outer: 16, inner: 8, top: 4, left: 4 }
-  }
-
-  const starSize = getStarSize()
+    drawStars()
+  }, [messages, width, height, isMobile, isTablet, theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Theme-aware colors
   const primaryColor = theme === "dark" ? "#fffff3" : "hsl(var(--name))"
@@ -670,4 +671,4 @@ export function Sandbox() {
       </AnimatePresence>
     </div>
   )
-}
+})

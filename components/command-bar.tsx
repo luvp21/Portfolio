@@ -222,7 +222,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
       setCommandHistory([])
     } else if (value === "help") {
       // Add help content to history
-      addToHistory(renderHelpContent(), false)
+      addToHistory("help", false)
     } else if (value === "close") {
       onOpenChange(false)
     } else if (socialCommands.includes(value)) {

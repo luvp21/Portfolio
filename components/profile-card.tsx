@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { memo } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MapPin, GraduationCap, Calendar, Mail, CalendarClock, FileBadge2 } from "lucide-react"
 import { FaLinkedin, FaGithub} from "react-icons/fa"
@@ -37,7 +38,7 @@ const links = [
   },
 ]
 
-export function ProfileCard() {
+export const ProfileCard = memo(function ProfileCard() {
   return (
     <motion.div
       className="flex flex-col p-4 h-full"
@@ -51,17 +52,17 @@ export function ProfileCard() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <Avatar className="w-24 h-24 group relative overflow-hidden bg-foreground border-4 border-name rounded-full shrink-0">
+        <Avatar className="w-24 h-24 group relative overflow-hidden bg-foreground border-2 border-name rounded-full shrink-0">
           <AvatarImage
-            src="/normal.png"
+            src="/Luv_Patel.jpg"
             alt="Profile"
-            className="transition-opacity duration-300 group-hover:opacity-0 object-center"
+            // className="transition-opacity duration-300 group-hover:opacity-0 object-center"
           />
-          <img
-            src="/like.png"
+          {/* <img
+            src="/Luv_Patel.jpg"
             alt="Profile Hover"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none"
-          />
+          /> */}
           <AvatarFallback>LP</AvatarFallback>
         </Avatar>
 
@@ -105,4 +106,4 @@ export function ProfileCard() {
 			
     </motion.div>
   )
-}
+})

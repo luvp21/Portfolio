@@ -261,18 +261,26 @@ export default function PortfolioInterface() {
         setShowCommandBar((prev) => !prev)
       }
 
-      // Space to toggle drag mode
+      // Space to toggle drag mode - only when not in input fields
       if (e.key === " " && !e.repeat) {
-        e.preventDefault()
-        if (canvasContainerRef.current) {
-          canvasContainerRef.current.style.cursor = "grab"
+        const target = e.target as HTMLElement
+        const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true'
+        
+        if (!isInputField) {
+          e.preventDefault()
+          if (canvasContainerRef.current) {
+            canvasContainerRef.current.style.cursor = "grab"
+          }
         }
       }
     }
 
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === " ") {
-        if (canvasContainerRef.current) {
+        const target = e.target as HTMLElement
+        const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true'
+        
+        if (!isInputField && canvasContainerRef.current) {
           canvasContainerRef.current.style.cursor = "default"
         }
       }
@@ -469,9 +477,14 @@ export default function PortfolioInterface() {
           <button
             onClick={() => setShowCommandBar(true)}
             className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 border cursor-pointer text-sm"
+            aria-label="Open command bar"
+            aria-describedby="command-bar-help"
           >
             {isMobile ? 'Press for ?' : 'Press / for ?'}
           </button>
+          <span id="command-bar-help" className="sr-only">
+            Press this button or use keyboard shortcut / to open the command bar
+          </span>
         </div>
 
         <div className="absolute top-4 right-4 flex items-center gap-2 z-[9999]">
@@ -481,8 +494,9 @@ export default function PortfolioInterface() {
               size="icon"
               onClick={resetPanelPositions}
               className="rounded-full relative group"
+              aria-label="Reset panel positions"
             >
-              <RotateCcw className="h-4 w-4" />              
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />              
             </Button>
           )}
 
@@ -491,8 +505,9 @@ export default function PortfolioInterface() {
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="rounded-full"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
           </Button>
         </div>
       </header>

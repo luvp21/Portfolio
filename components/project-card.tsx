@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo } from "react"
 import { motion } from "framer-motion"
 import { ExternalLink, Github } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ interface ProjectCardProps {
   liveUrl?: string
 }
 
-export function ProjectCard({ title, description, tags, image, githubUrl, liveUrl }: ProjectCardProps) {
+export const ProjectCard = memo(function ProjectCard({ title, description, tags, image, githubUrl, liveUrl }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
@@ -71,4 +71,4 @@ export function ProjectCard({ title, description, tags, image, githubUrl, liveUr
       </div>
     </motion.div>
   )
-}
+})
