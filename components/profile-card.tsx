@@ -41,13 +41,13 @@ const links = [
 export const ProfileCard = memo(function ProfileCard() {
   return (
     <motion.div
-      className="flex flex-col p-4 h-full"
+      className="flex flex-col h-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <motion.div
-        className="flex justify-center gap-2 sm:gap-6 mt-6"
+        className="flex gap-1 sm:gap-6 mt-6 lg:px-4"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -73,9 +73,9 @@ export const ProfileCard = memo(function ProfileCard() {
             I'm a <span className="text-name">Full Stack Developer</span>
           </p> */}
 
-          <div className="flex gap-3 ">
+          <div className="flex gap-1 ">
             {tags.map((tag, index) => (
-              <div className="flex items-center gap-2 py-1 rounded-full text-muted-foreground bg-muted/10">
+              <div className="flex items-center gap-1 py-1 rounded-full text-muted-foreground bg-muted/10">
                 {tag.icon}
                 <span className="text-sm font-medium">{tag.text}</span>
               </div>
@@ -100,7 +100,7 @@ export const ProfileCard = memo(function ProfileCard() {
         </div>
       </motion.div>
 
-			<p className="text-muted-foreground text-md mt-6 max-w-xl mx-auto leading-relaxed">
+			<p className="text-muted-foreground text-md mt-6 lg:px-4 max-w-xl mx-auto leading-relaxed">
         I'm a Computer Science student who enjoys building web apps. I like solving problems and making things that work well.
       </p>
 

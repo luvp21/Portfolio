@@ -123,11 +123,26 @@ export const Sandbox = React.memo(function Sandbox() {
     return { outer: 16, inner: 8, top: 4, left: 4 }
   }, [isMobile, isTablet])
 
+  // Normalize position to fit within container bounds
+  const normalizePosition = useCallback((x: number, y: number) => {
+    if (!containerRef.current) return { x, y }
+
+    const containerWidth = containerRef.current.clientWidth
+    const containerHeight = containerRef.current.clientHeight
+    const margin = isMobile ? 30 : 40
+
+    // Clamp position within bounds with margin
+    const normalizedX = Math.max(margin, Math.min(x, containerWidth - margin - starSize.outer))
+    const normalizedY = Math.max(margin, Math.min(y, containerHeight - margin - starSize.outer))
+
+    return { x: normalizedX, y: normalizedY }
+  }, [isMobile, starSize.outer])
+
   // Smart tooltip positioning with container bounds
   const { position, tooltipRef } = useSmartTooltip(
     !!hoveredMessage,
-    hoveredMessage?.x_position || 0,
-    hoveredMessage?.y_position || 0,
+    hoveredMessage ? normalizePosition(hoveredMessage.x_position, hoveredMessage.y_position).x : 0,
+    hoveredMessage ? normalizePosition(hoveredMessage.x_position, hoveredMessage.y_position).y : 0,
     containerRef,
   )
 
@@ -303,17 +318,21 @@ export const Sandbox = React.memo(function Sandbox() {
 
     for (let i = 0; i < messages.length; i++) {
       for (let j = i + 1; j < messages.length; j++) {
+        // Use normalized positions for connection calculations
+        const pos1 = normalizePosition(messages[i].x_position, messages[i].y_position)
+        const pos2 = normalizePosition(messages[j].x_position, messages[j].y_position)
+        
         const distance = Math.sqrt(
-          Math.pow(messages[i].x_position - messages[j].x_position, 2) +
-            Math.pow(messages[i].y_position - messages[j].y_position, 2),
+          Math.pow(pos1.x - pos2.x, 2) +
+            Math.pow(pos1.y - pos2.y, 2),
         )
 
         if (distance < connectionDistance) {
           // Connect to the center of each star
-          const centerX1 = messages[i].x_position + starCenterOffset
-          const centerY1 = messages[i].y_position + starCenterOffset
-          const centerX2 = messages[j].x_position + starCenterOffset
-          const centerY2 = messages[j].y_position + starCenterOffset
+          const centerX1 = pos1.x + starCenterOffset
+          const centerY1 = pos1.y + starCenterOffset
+          const centerX2 = pos2.x + starCenterOffset
+          const centerY2 = pos2.y + starCenterOffset
           
           ctx.moveTo(centerX1, centerY1)
           ctx.lineTo(centerX2, centerY2)
@@ -346,7 +365,7 @@ export const Sandbox = React.memo(function Sandbox() {
       ctx.fillStyle = color
       ctx.fill()
     }
-  }, [messages, theme, isMobile, isTablet, starSize])
+  }, [messages, theme, isMobile, isTablet, starSize, normalizePosition])
 
   // Initialize and handle window resize
   useEffect(() => {
@@ -393,51 +412,54 @@ export const Sandbox = React.memo(function Sandbox() {
       ))}
 
       {/* Message stars */}
-      {messages.map((msg) => (
-        <motion.div
-          key={msg.id}
-          className="absolute z-10 cursor-pointer"
-          style={{
-            left: `${msg.x_position}px`,
-            top: `${msg.y_position}px`,
-          }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: isMobile ? 1.1 : 1.2 }} // Smaller hover scale on mobile
-          whileTap={{ scale: 0.95 }} // Add tap feedback for mobile
-          onMouseEnter={() => !isMobile && setHoveredMessage(msg)} // Only on hover for desktop
-          onMouseLeave={() => !isMobile && setHoveredMessage(null)}
-          onClick={() => isMobile && setHoveredMessage(hoveredMessage?.id === msg.id ? null : msg)} // Toggle on mobile
-        >
-          <div
-            className={`relative`}
+      {messages.map((msg) => {
+        const normalizedPos = normalizePosition(msg.x_position, msg.y_position)
+        return (
+          <motion.div
+            key={msg.id}
+            className="absolute z-10 cursor-pointer"
             style={{
-              animationDuration: `${3 + Math.random() * 4}s`,
+              left: `${normalizedPos.x}px`,
+              top: `${normalizedPos.y}px`,
             }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            whileHover={{ scale: isMobile ? 1.1 : 1.2 }} // Smaller hover scale on mobile
+            whileTap={{ scale: 0.95 }} // Add tap feedback for mobile
+            onMouseEnter={() => !isMobile && setHoveredMessage(msg)} // Only on hover for desktop
+            onMouseLeave={() => !isMobile && setHoveredMessage(null)}
+            onClick={() => isMobile && setHoveredMessage(hoveredMessage?.id === msg.id ? null : msg)} // Toggle on mobile
           >
             <div
-              className={`absolute rounded-full animate-pulse`}
+              className={`relative`}
               style={{
-                width: `${starSize.outer}px`,
-                height: `${starSize.outer}px`,
-                backgroundColor: msg.color,
-                boxShadow: `0 0 ${isMobile ? 8 : 12}px ${msg.color}`,
+                animationDuration: `${3 + Math.random() * 4}s`,
               }}
-            />
-            <div
-              className="rounded-full absolute"
-              style={{
-                width: `${starSize.inner}px`,
-                height: `${starSize.inner}px`,
-                top: `${starSize.top}px`,
-                left: `${starSize.left}px`,
-                backgroundColor: theme === "dark" ? "white" : "#a374ff",
-                opacity: 0.8,
-              }}
-            />
-          </div>
-        </motion.div>
-      ))}
+            >
+              <div
+                className={`absolute rounded-full animate-pulse`}
+                style={{
+                  width: `${starSize.outer}px`,
+                  height: `${starSize.outer}px`,
+                  backgroundColor: `${ theme === "dark" ? msg.color : "#A374FF" }`,
+                  boxShadow: `0 0 ${isMobile ? 8 : 12}px ${ theme === "dark" ? msg.color : "#A374FF" }`,
+                }}
+              />
+              <div
+                className="rounded-full absolute"
+                style={{
+                  width: `${starSize.inner}px`,
+                  height: `${starSize.inner}px`,
+                  top: `${starSize.top}px`,
+                  left: `${starSize.left}px`,
+                  backgroundColor: theme === "dark" ? "white" : "#a374ff",
+                  opacity: 0.8,
+                }}
+              />
+            </div>
+          </motion.div>
+        )
+      })}
 
       {/* Smart message tooltip */}
       <AnimatePresence>
@@ -464,8 +486,8 @@ export const Sandbox = React.memo(function Sandbox() {
               <div
                 className={`rounded-full ${isMobile ? "w-2.5 h-2.5" : "w-3 h-3"}`}
                 style={{
-                  backgroundColor: hoveredMessage.color,
-                  boxShadow: `0 0 5px ${hoveredMessage.color}`,
+                  backgroundColor: `${theme === "dark" ? hoveredMessage.color : "#A374FF"}`,
+                  boxShadow: `0 0 5px ${theme === "dark" ? hoveredMessage.color : "#A374FF"}`,
                 }}
               />
               <p className={`font-medium ${isMobile ? "text-sm" : ""}`} style={{ color: textColor }}>

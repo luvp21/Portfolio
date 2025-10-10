@@ -21,9 +21,23 @@ export function ExperienceTimeline() {
   const experiences: ExperienceItem[] = [
     {
       id: 1,
+      title: "General Secretary",
+      company: "Computer Society of India - Nirma University",
+      period: " Aug 2025 – Present",
+      description:
+        "Managing club operations, leading teams, and overseeing events and initiatives at CSI Nirma.",
+      skills: [
+        "Leadership",
+        "Team Management",
+        "Communication"
+      ],
+      icon: "organization",
+    },
+    {
+      id: 2,
       title: "Core Committee Member",
       company: "Computer Society of India - Nirma University",
-      period: " Oct 2024 – Present",
+      period: " Oct 2024 – Aug 2025",
       description:
         "Developed CSI Nirma’s official websit.",
       skills: [
@@ -37,7 +51,7 @@ export function ExperienceTimeline() {
       icon: "organization",
     },
     {
-      id: 2,
+      id: 3,
       title: "B.Tech in Computer Science and Engineering",
       company: "Nirma University",
       period: "2024 – 2027",
@@ -72,7 +86,7 @@ export function ExperienceTimeline() {
   }
 
   return (
-    <div className="space-y-4 hide-scrollbar">
+    <div className="space-y-4 p-2 hide-scrollbar">
       {experiences.map((exp) => (
         <motion.div
           key={exp.id}

@@ -529,7 +529,7 @@ export default function PortfolioInterface() {
               )}
               {renderMobilePanel(
                 "experience",
-                "Experience",
+                "Experience & Education",
                 <History className="h-4 w-4" />,
                 <div className="max-h-[600px] overflow-y-auto">
                   <ExperienceTimeline />
@@ -573,6 +573,7 @@ export default function PortfolioInterface() {
                 <div className="h-[500px] sm:h-[400px]">
                   <Sandbox />
                 </div>,
+
                 "500px",
               )}
             </div>
@@ -685,7 +686,7 @@ export default function PortfolioInterface() {
                       {panelType === "stack" && <TechStack />}
 
                       {panelType === "experience" && (
-                        <div className="p-4 overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar border-cborder">
+                        <div className=" overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar border-cborder">
                           <ExperienceTimeline />
                         </div>
                       )}
@@ -704,7 +705,17 @@ export default function PortfolioInterface() {
       </div>
 
       {/* Footer - Only shows on desktop */}
-      {!isMobile && (
+      {isMobile ? (
+        // Desktop footer
+        <div className=" bg-background/80 backdrop-blur-sm border-border/20 pt-3 border-t border-b">
+          <div className="h-full px-8">
+            <div className="text-sm text-muted-foreground/70">
+              // Built with Next.js, Tailwind, and Supabase;{"        "}
+              <span className="text-name">thanks()</span>;
+            </div>
+          </div>
+        </div>
+      ) : (
         <footer className="flex-none bg-background/80 backdrop-blur-sm border-border/20 pt-3">
           <div className="h-full px-8 flex items-center justify-between">
             {/* Left side - Tech stack */}
