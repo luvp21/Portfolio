@@ -1,9 +1,9 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { Plus, X, MessageSquare, Info } from "lucide-react"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
@@ -100,7 +100,7 @@ const useResponsiveDimensions = () => {
   return dimensions
 }
 
-export function Sandbox() {
+export const Sandbox = React.memo(function Sandbox() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -116,24 +116,46 @@ export function Sandbox() {
 
   const { width, height, isMobile, isTablet } = useResponsiveDimensions()
 
+  // Responsive star sizes
+  const starSize = useMemo(() => {
+    if (isMobile) return { outer: 12, inner: 6, top: 3, left: 3 }
+    if (isTablet) return { outer: 14, inner: 7, top: 3.5, left: 3.5 }
+    return { outer: 16, inner: 8, top: 4, left: 4 }
+  }, [isMobile, isTablet])
+
+  // Normalize position to fit within container bounds
+  const normalizePosition = useCallback((x: number, y: number) => {
+    if (!containerRef.current) return { x, y }
+
+    const containerWidth = containerRef.current.clientWidth
+    const containerHeight = containerRef.current.clientHeight
+    const margin = isMobile ? 30 : 40
+
+    // Clamp position within bounds with margin
+    const normalizedX = Math.max(margin, Math.min(x, containerWidth - margin - starSize.outer))
+    const normalizedY = Math.max(margin, Math.min(y, containerHeight - margin - starSize.outer))
+
+    return { x: normalizedX, y: normalizedY }
+  }, [isMobile, starSize.outer])
+
   // Smart tooltip positioning with container bounds
   const { position, tooltipRef } = useSmartTooltip(
     !!hoveredMessage,
-    hoveredMessage?.x_position || 0,
-    hoveredMessage?.y_position || 0,
+    hoveredMessage ? normalizePosition(hoveredMessage.x_position, hoveredMessage.y_position).x : 0,
+    hoveredMessage ? normalizePosition(hoveredMessage.x_position, hoveredMessage.y_position).y : 0,
     containerRef,
   )
 
   // Use theme-aware colors
-  const getRandomColor = () => {
+  const getRandomColor = useCallback(() => {
     const lightColors = ["#fffff3", "#A374FF"]
     const darkColors = ["#fffff3", "#A374FF"]
     const colors = theme === "dark" ? darkColors : lightColors
     return colors[Math.floor(Math.random() * colors.length)]
-  }
+  }, [theme])
 
   // Fetch messages from Supabase
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const { data, error } = await supabase.from("messages").select("*").order("created_at", { ascending: false })
 
@@ -146,7 +168,7 @@ export function Sandbox() {
     } catch (error) {
       console.error("Error fetching messages:", error)
     }
-  }
+  }, [])
 
   // Add a new message
   const addMessage = async (e: React.FormEvent) => {
@@ -158,7 +180,7 @@ export function Sandbox() {
         description: "Please provide both your name and a message.",
         variant: "destructive",
       })
-      return
+      return                                                                                                                                                                                                                                                
     }
 
     setIsLoading(true)
@@ -173,7 +195,7 @@ export function Sandbox() {
       const y_position = Math.random() * (containerHeight - margin * 2) + margin
       const color = getRandomColor()
 
-      const { data, error } = await supabase
+      const { data, error } = await supabase                                                                                                                                     
         .from("messages")
         .insert([{ name, message, x_position, y_position, color }])
         .select()
@@ -260,7 +282,7 @@ export function Sandbox() {
   }, [particles, width, height])
 
   // Draw stars and connections on canvas
-  const drawStars = () => {
+  const drawStars = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas || !containerRef.current) return
 
@@ -292,17 +314,28 @@ export function Sandbox() {
     ctx.lineWidth = 0.8
 
     const connectionDistance = isMobile ? 150 : isTablet ? 200 : 250
+    const starCenterOffset = starSize.outer / 2 // Offset to center of star
 
     for (let i = 0; i < messages.length; i++) {
       for (let j = i + 1; j < messages.length; j++) {
+        // Use normalized positions for connection calculations
+        const pos1 = normalizePosition(messages[i].x_position, messages[i].y_position)
+        const pos2 = normalizePosition(messages[j].x_position, messages[j].y_position)
+        
         const distance = Math.sqrt(
-          Math.pow(messages[i].x_position - messages[j].x_position, 2) +
-            Math.pow(messages[i].y_position - messages[j].y_position, 2),
+          Math.pow(pos1.x - pos2.x, 2) +
+            Math.pow(pos1.y - pos2.y, 2),
         )
 
         if (distance < connectionDistance) {
-          ctx.moveTo(messages[i].x_position, messages[i].y_position)
-          ctx.lineTo(messages[j].x_position, messages[j].y_position)
+          // Connect to the center of each star
+          const centerX1 = pos1.x + starCenterOffset
+          const centerY1 = pos1.y + starCenterOffset
+          const centerX2 = pos2.x + starCenterOffset
+          const centerY2 = pos2.y + starCenterOffset
+          
+          ctx.moveTo(centerX1, centerY1)
+          ctx.lineTo(centerX2, centerY2)
         }
       }
     }
@@ -332,30 +365,17 @@ export function Sandbox() {
       ctx.fillStyle = color
       ctx.fill()
     }
-  }
+  }, [messages, theme, isMobile, isTablet, starSize, normalizePosition])
 
   // Initialize and handle window resize
   useEffect(() => {
     fetchMessages()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Redraw stars when messages or dimensions change
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      drawStars()
-    }, 100) // Small delay to ensure container dimensions are updated
-
-    return () => clearTimeout(timeoutId)
-  }, [messages, width, height, isMobile, isTablet, theme])
-
-  // Responsive star sizes
-  const getStarSize = () => {
-    if (isMobile) return { outer: 12, inner: 6, top: 3, left: 3 }
-    if (isTablet) return { outer: 14, inner: 7, top: 3.5, left: 3.5 }
-    return { outer: 16, inner: 8, top: 4, left: 4 }
-  }
-
-  const starSize = getStarSize()
+    drawStars()
+  }, [messages, width, height, isMobile, isTablet, theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Theme-aware colors
   const primaryColor = theme === "dark" ? "#fffff3" : "hsl(var(--name))"
@@ -392,51 +412,54 @@ export function Sandbox() {
       ))}
 
       {/* Message stars */}
-      {messages.map((msg) => (
-        <motion.div
-          key={msg.id}
-          className="absolute z-10 cursor-pointer"
-          style={{
-            left: `${msg.x_position}px`,
-            top: `${msg.y_position}px`,
-          }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: isMobile ? 1.1 : 1.2 }} // Smaller hover scale on mobile
-          whileTap={{ scale: 0.95 }} // Add tap feedback for mobile
-          onMouseEnter={() => !isMobile && setHoveredMessage(msg)} // Only on hover for desktop
-          onMouseLeave={() => !isMobile && setHoveredMessage(null)}
-          onClick={() => isMobile && setHoveredMessage(hoveredMessage?.id === msg.id ? null : msg)} // Toggle on mobile
-        >
-          <div
-            className={`relative`}
+      {messages.map((msg) => {
+        const normalizedPos = normalizePosition(msg.x_position, msg.y_position)
+        return (
+          <motion.div
+            key={msg.id}
+            className="absolute z-10 cursor-pointer"
             style={{
-              animationDuration: `${3 + Math.random() * 4}s`,
+              left: `${normalizedPos.x}px`,
+              top: `${normalizedPos.y}px`,
             }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            whileHover={{ scale: isMobile ? 1.1 : 1.2 }} // Smaller hover scale on mobile
+            whileTap={{ scale: 0.95 }} // Add tap feedback for mobile
+            onMouseEnter={() => !isMobile && setHoveredMessage(msg)} // Only on hover for desktop
+            onMouseLeave={() => !isMobile && setHoveredMessage(null)}
+            onClick={() => isMobile && setHoveredMessage(hoveredMessage?.id === msg.id ? null : msg)} // Toggle on mobile
           >
             <div
-              className={`absolute rounded-full animate-pulse`}
+              className={`relative`}
               style={{
-                width: `${starSize.outer}px`,
-                height: `${starSize.outer}px`,
-                backgroundColor: msg.color,
-                boxShadow: `0 0 ${isMobile ? 8 : 12}px ${msg.color}`,
+                animationDuration: `${3 + Math.random() * 4}s`,
               }}
-            />
-            <div
-              className="rounded-full absolute"
-              style={{
-                width: `${starSize.inner}px`,
-                height: `${starSize.inner}px`,
-                top: `${starSize.top}px`,
-                left: `${starSize.left}px`,
-                backgroundColor: theme === "dark" ? "white" : "#a374ff",
-                opacity: 0.8,
-              }}
-            />
-          </div>
-        </motion.div>
-      ))}
+            >
+              <div
+                className={`absolute rounded-full animate-pulse`}
+                style={{
+                  width: `${starSize.outer}px`,
+                  height: `${starSize.outer}px`,
+                  backgroundColor: `${ theme === "dark" ? msg.color : "#A374FF" }`,
+                  boxShadow: `0 0 ${isMobile ? 8 : 12}px ${ theme === "dark" ? msg.color : "#A374FF" }`,
+                }}
+              />
+              <div
+                className="rounded-full absolute"
+                style={{
+                  width: `${starSize.inner}px`,
+                  height: `${starSize.inner}px`,
+                  top: `${starSize.top}px`,
+                  left: `${starSize.left}px`,
+                  backgroundColor: theme === "dark" ? "white" : "#a374ff",
+                  opacity: 0.8,
+                }}
+              />
+            </div>
+          </motion.div>
+        )
+      })}
 
       {/* Smart message tooltip */}
       <AnimatePresence>
@@ -463,8 +486,8 @@ export function Sandbox() {
               <div
                 className={`rounded-full ${isMobile ? "w-2.5 h-2.5" : "w-3 h-3"}`}
                 style={{
-                  backgroundColor: hoveredMessage.color,
-                  boxShadow: `0 0 5px ${hoveredMessage.color}`,
+                  backgroundColor: `${theme === "dark" ? hoveredMessage.color : "#A374FF"}`,
+                  boxShadow: `0 0 5px ${theme === "dark" ? hoveredMessage.color : "#A374FF"}`,
                 }}
               />
               <p className={`font-medium ${isMobile ? "text-sm" : ""}`} style={{ color: textColor }}>
@@ -559,9 +582,20 @@ export function Sandbox() {
               borderColor: borderColor,
             }}
           >
-            <h4 className={`font-bold mb-2 ${isMobile ? "text-base" : ""}`} style={{ color: secondaryColor }}>
-              About This Space
-            </h4>
+            <div className="flex justify-between items-center mb-2">
+              <h4 className={`font-bold ${isMobile ? "text-base" : ""}`} style={{ color: secondaryColor }}>
+                About This Space
+              </h4>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                onClick={() => setShowInfo(false)}
+              >
+                <X size={isMobile ? 14 : 16} style={{ color: textColor }} />
+              </Button>
+            </div>
+
             <p className={`mb-3 ${isMobile ? "text-sm" : "text-sm"}`} style={{ color: textColor, opacity: 0.9 }}>
               This interactive space allows visitors to leave messages as glowing stars.
             </p>
@@ -670,4 +704,4 @@ export function Sandbox() {
       </AnimatePresence>
     </div>
   )
-}
+})

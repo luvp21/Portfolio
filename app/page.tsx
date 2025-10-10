@@ -261,18 +261,26 @@ export default function PortfolioInterface() {
         setShowCommandBar((prev) => !prev)
       }
 
-      // Space to toggle drag mode
+      // Space to toggle drag mode - only when not in input fields
       if (e.key === " " && !e.repeat) {
-        e.preventDefault()
-        if (canvasContainerRef.current) {
-          canvasContainerRef.current.style.cursor = "grab"
+        const target = e.target as HTMLElement
+        const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true'
+        
+        if (!isInputField) {
+          e.preventDefault()
+          if (canvasContainerRef.current) {
+            canvasContainerRef.current.style.cursor = "grab"
+          }
         }
       }
     }
 
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === " ") {
-        if (canvasContainerRef.current) {
+        const target = e.target as HTMLElement
+        const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true'
+        
+        if (!isInputField && canvasContainerRef.current) {
           canvasContainerRef.current.style.cursor = "default"
         }
       }
@@ -449,7 +457,7 @@ export default function PortfolioInterface() {
     if (!panels[panelType]?.active) return null
 
     return (
-      <div className="w-full border rounded-lg shadow-sm mb-4 bg-card">
+      <div className="w-full border rounded-lg shadow-sm mb-4 bg-card hide-scrollbar">
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             {icon}
@@ -464,17 +472,21 @@ export default function PortfolioInterface() {
   return (
     <div className="h-screen w-full transition-colors duration-300 flex flex-col">
       {/* Header */}
-      <header className="flex-none h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="absolute top-4 left-4 z-[9999] flex items-center gap-2">
+      <header className={`flex-none h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${
+        isMobile ? "border-b" : ""
+      }`}>
+        <div className="absolute inset-y-0 left-4 z-[9999] flex items-center gap-2">
           <button
             onClick={() => setShowCommandBar(true)}
             className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 border cursor-pointer text-sm"
+            aria-label="Open command bar"
+            aria-describedby="command-bar-help"
           >
             {isMobile ? 'Press for ?' : 'Press / for ?'}
           </button>
         </div>
 
-        <div className="absolute top-4 right-4 flex items-center gap-2 z-[9999]">
+        <div className="absolute inset-y-0 right-4 flex items-center gap-2 z-[9999]">
           {!isMobile && (
             <Button
               variant="outline"
@@ -482,10 +494,9 @@ export default function PortfolioInterface() {
               onClick={resetPanelPositions}
               className="rounded-full relative group"
             >
-              <RotateCcw className="h-4 w-4" />              
+              <RotateCcw className="h-4 w-4" />
             </Button>
           )}
-
           <Button
             variant="outline"
             size="icon"
@@ -501,8 +512,12 @@ export default function PortfolioInterface() {
       <div className="relative flex-1 overflow-hidden">
         {/* Mobile Layout */}
         {isMobile ? (
-          <div className="h-full overflow-y-auto">
-            <div className="min-h-full pt-4 pb-20 space-y-4 p-4">
+          <div className={cn(
+            "h-full overflow-y-auto hide-scrollbar",
+            theme === "dark" ? "mobile-grid-dark" : "mobile-grid-light"
+          )}>
+            
+            <div className="min-h-full pt-4 pb-20 space-y-4 px-3">
               {renderMobilePanel("about", "About Me", <User className="h-4 w-4" />, <ProfileCard />, "500px")}
               {renderMobilePanel("stack", "Tech Stack", <Layers className="h-4 w-4" />, <TechStack />, "500px")}
               {renderMobilePanel(
@@ -514,7 +529,7 @@ export default function PortfolioInterface() {
               )}
               {renderMobilePanel(
                 "experience",
-                "Experience",
+                "Experience & Education",
                 <History className="h-4 w-4" />,
                 <div className="max-h-[600px] overflow-y-auto">
                   <ExperienceTimeline />
@@ -525,7 +540,7 @@ export default function PortfolioInterface() {
                 "projects",
                 "Projects",
                 <Briefcase className="h-4 w-4" />,
-                <div className="space-y-4 max-h-[800px] overflow-y-auto p-2">
+                <div className="space-y-4 max-h-[350px] overflow-y-auto p-2 hide-scrollbar">
                   <ProjectCard
                     title="Interactive Portfolio"
                     description="A canvas-based portfolio with draggable panels and Command Terminal"
@@ -555,9 +570,10 @@ export default function PortfolioInterface() {
                 "message",
                 "Message Constellation",
                 <FileText className="h-4 w-4" />,
-                <div className="h-[300px] sm:h-[400px]">
+                <div className="h-[500px] sm:h-[400px]">
                   <Sandbox />
                 </div>,
+
                 "500px",
               )}
             </div>
@@ -670,7 +686,7 @@ export default function PortfolioInterface() {
                       {panelType === "stack" && <TechStack />}
 
                       {panelType === "experience" && (
-                        <div className="p-4 overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar border-cborder">
+                        <div className=" overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar border-cborder">
                           <ExperienceTimeline />
                         </div>
                       )}
@@ -689,7 +705,17 @@ export default function PortfolioInterface() {
       </div>
 
       {/* Footer - Only shows on desktop */}
-      {!isMobile && (
+      {isMobile ? (
+        // Desktop footer
+        <div className=" bg-background/80 backdrop-blur-sm border-border/20 pt-3 border-t border-b">
+          <div className="h-full px-4">
+            <div className="text-sm text-muted-foreground/70">
+              // Built with Next.js, Tailwind, and Supabase;{"        "}
+              <span className="text-name">thanks()</span>;
+            </div>
+          </div>
+        </div>
+      ) : (
         <footer className="flex-none bg-background/80 backdrop-blur-sm border-border/20 pt-3">
           <div className="h-full px-8 flex items-center justify-between">
             {/* Left side - Tech stack */}
