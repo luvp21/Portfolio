@@ -708,7 +708,7 @@ export default function PortfolioInterface() {
       {isMobile ? (
         // Desktop footer
         <div className=" bg-background/80 backdrop-blur-sm border-border/20 pt-3 border-t border-b">
-          <div className="h-full px-8">
+          <div className="h-full px-4">
             <div className="text-sm text-muted-foreground/70">
               // Built with Next.js, Tailwind, and Supabase;{"        "}
               <span className="text-name">thanks()</span>;
