@@ -1,4 +1,4 @@
-"use client"
+goog"use client"
 
 import type React from "react"
 
