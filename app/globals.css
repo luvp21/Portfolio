@@ -95,6 +95,21 @@
     background-size: 50px 50px;
   }
 
+  
+  .mobile-grid-light {
+    background-color: #F0EBE3; 
+    background-image:
+      repeating-linear-gradient(45deg, rgba(16, 16, 16, 0.08) 0, rgba(16, 16, 16, 0.08) 1px, transparent 1px, transparent 30px),
+      repeating-linear-gradient(135deg, rgba(16, 16, 16, 0.08) 0, rgba(16, 16, 16, 0.08) 1px, transparent 1px, transparent 30px);
+    }
+
+  .mobile-grid-dark {
+    background-image: 
+      linear-gradient(to right, rgba(163, 116, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(163, 116, 255, 0.08) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
   .hide-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */

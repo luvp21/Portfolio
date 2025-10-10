@@ -457,7 +457,7 @@ export default function PortfolioInterface() {
     if (!panels[panelType]?.active) return null
 
     return (
-      <div className="w-full border rounded-lg shadow-sm mb-4 bg-card">
+      <div className="w-full border rounded-lg shadow-sm mb-4 bg-card hide-scrollbar">
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
             {icon}
@@ -472,8 +472,10 @@ export default function PortfolioInterface() {
   return (
     <div className="h-screen w-full transition-colors duration-300 flex flex-col">
       {/* Header */}
-      <header className="flex-none h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="absolute top-4 left-4 z-[9999] flex items-center gap-2">
+      <header className={`flex-none h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${
+        isMobile ? "border-b" : ""
+      }`}>
+        <div className="absolute inset-y-0 left-4 z-[9999] flex items-center gap-2">
           <button
             onClick={() => setShowCommandBar(true)}
             className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 border cursor-pointer text-sm"
@@ -482,32 +484,26 @@ export default function PortfolioInterface() {
           >
             {isMobile ? 'Press for ?' : 'Press / for ?'}
           </button>
-          <span id="command-bar-help" className="sr-only">
-            Press this button or use keyboard shortcut / to open the command bar
-          </span>
         </div>
 
-        <div className="absolute top-4 right-4 flex items-center gap-2 z-[9999]">
+        <div className="absolute inset-y-0 right-4 flex items-center gap-2 z-[9999]">
           {!isMobile && (
             <Button
               variant="outline"
               size="icon"
               onClick={resetPanelPositions}
               className="rounded-full relative group"
-              aria-label="Reset panel positions"
             >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />              
+              <RotateCcw className="h-4 w-4" />
             </Button>
           )}
-
           <Button
             variant="outline"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="rounded-full"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
-            {theme === "dark" ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
         </div>
       </header>
@@ -516,8 +512,12 @@ export default function PortfolioInterface() {
       <div className="relative flex-1 overflow-hidden">
         {/* Mobile Layout */}
         {isMobile ? (
-          <div className="h-full overflow-y-auto">
-            <div className="min-h-full pt-4 pb-20 space-y-4 p-4">
+          <div className={cn(
+            "h-full overflow-y-auto hide-scrollbar",
+            theme === "dark" ? "mobile-grid-dark" : "mobile-grid-light"
+          )}>
+            
+            <div className="min-h-full pt-4 pb-20 space-y-4 px-3">
               {renderMobilePanel("about", "About Me", <User className="h-4 w-4" />, <ProfileCard />, "500px")}
               {renderMobilePanel("stack", "Tech Stack", <Layers className="h-4 w-4" />, <TechStack />, "500px")}
               {renderMobilePanel(
@@ -540,7 +540,7 @@ export default function PortfolioInterface() {
                 "projects",
                 "Projects",
                 <Briefcase className="h-4 w-4" />,
-                <div className="space-y-4 max-h-[800px] overflow-y-auto p-2">
+                <div className="space-y-4 max-h-[350px] overflow-y-auto p-2 hide-scrollbar">
                   <ProjectCard
                     title="Interactive Portfolio"
                     description="A canvas-based portfolio with draggable panels and Command Terminal"
@@ -570,7 +570,7 @@ export default function PortfolioInterface() {
                 "message",
                 "Message Constellation",
                 <FileText className="h-4 w-4" />,
-                <div className="h-[300px] sm:h-[400px]">
+                <div className="h-[500px] sm:h-[400px]">
                   <Sandbox />
                 </div>,
                 "500px",

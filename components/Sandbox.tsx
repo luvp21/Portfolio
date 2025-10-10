@@ -560,9 +560,20 @@ export const Sandbox = React.memo(function Sandbox() {
               borderColor: borderColor,
             }}
           >
-            <h4 className={`font-bold mb-2 ${isMobile ? "text-base" : ""}`} style={{ color: secondaryColor }}>
-              About This Space
-            </h4>
+            <div className="flex justify-between items-center mb-2">
+              <h4 className={`font-bold ${isMobile ? "text-base" : ""}`} style={{ color: secondaryColor }}>
+                About This Space
+              </h4>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                onClick={() => setShowInfo(false)}
+              >
+                <X size={isMobile ? 14 : 16} style={{ color: textColor }} />
+              </Button>
+            </div>
+
             <p className={`mb-3 ${isMobile ? "text-sm" : "text-sm"}`} style={{ color: textColor, opacity: 0.9 }}>
               This interactive space allows visitors to leave messages as glowing stars.
             </p>

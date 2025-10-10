@@ -47,11 +47,12 @@ export const ProfileCard = memo(function ProfileCard() {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <motion.div
-        className="flex justify-center flex-wrap gap-4 sm:gap-6 mt-6"
+        className="flex justify-center gap-2 sm:gap-6 mt-6"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
+        
         <Avatar className="w-24 h-24 group relative overflow-hidden bg-foreground border-2 border-name rounded-full shrink-0">
           <AvatarImage
             src="/Luv_Patel.jpg"
@@ -72,7 +73,7 @@ export const ProfileCard = memo(function ProfileCard() {
             I'm a <span className="text-name">Full Stack Developer</span>
           </p> */}
 
-          <div className="flex flex-wrap gap-3 ">
+          <div className="flex gap-3 ">
             {tags.map((tag, index) => (
               <div className="flex items-center gap-2 py-1 rounded-full text-muted-foreground bg-muted/10">
                 {tag.icon}
@@ -89,7 +90,7 @@ export const ProfileCard = memo(function ProfileCard() {
 							href={link.href}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="opacity-60 hover:opacity-100 transition-opacity duration-300 p-1"
+							className="opacity-60 hover:opacity-100 transition-opacity duration-300 py-1"
 							>
 							{link.icon}
 							</a>

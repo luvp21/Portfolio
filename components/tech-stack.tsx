@@ -25,7 +25,7 @@ const technologies = [
 export function TechStack() {
 
   return (
-    <div className="grid grid-cols-4 gap-4 p-4 max-w-xl mx-auto">
+    <div className="grid grid-cols-4 gap-4 p-1 max-w-xl mx-auto">
       {technologies.map((tech) => {
         const Icon = tech.icon
 
