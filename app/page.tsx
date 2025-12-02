@@ -96,7 +96,7 @@ const createDefaultPanelState = (
   })
 
   return {
-    about: { active: true, position: positions.about, minimized: false, zIndex: 1, pinned: false },
+    about: { active: false, position: positions.about, minimized: false, zIndex: 1, pinned: false },
     projects: { active: false, position: positions.projects, minimized: false, zIndex: 1, pinned: false },
     experience: { active: false, position: positions.experience, minimized: false, zIndex: 1, pinned: false },
     message: { active: false, position: positions.message, minimized: false, zIndex: 1, pinned: false },
