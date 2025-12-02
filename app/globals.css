@@ -95,16 +95,16 @@
     background-size: 50px 50px;
   }
 
-  
+
   .mobile-grid-light {
-    background-color: #F0EBE3; 
+    background-color: #F0EBE3;
     background-image:
       repeating-linear-gradient(45deg, rgba(16, 16, 16, 0.08) 0, rgba(16, 16, 16, 0.08) 1px, transparent 1px, transparent 30px),
       repeating-linear-gradient(135deg, rgba(16, 16, 16, 0.08) 0, rgba(16, 16, 16, 0.08) 1px, transparent 1px, transparent 30px);
     }
 
   .mobile-grid-dark {
-    background-image: 
+    background-image:
       linear-gradient(to right, rgba(163, 116, 255, 0.08) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(163, 116, 255, 0.08) 1px, transparent 1px);
     background-size: 30px 30px;
@@ -135,5 +135,41 @@
 @layer components {
   .command-item {
     @apply flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent aria-selected:bg-accent;
+  }
+
+  .handwritten-text {
+    font-family: var(--font-caveat), 'Caveat', cursive;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .pixelated-text {
+    font-family: var(--font-pixel), 'Press Start 2P', monospace;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    font-smooth: never;
+    text-rendering: optimizeSpeed;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+  .pixelated-text-small {
+    font-family: var(--font-pixel), 'Press Start 2P', monospace;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    line-height: 1.8;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    font-smooth: never;
+    text-rendering: optimizeSpeed;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
   }
 }

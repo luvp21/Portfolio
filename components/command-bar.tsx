@@ -52,10 +52,10 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window)
     }
-    
+
     checkIsMobile()
     window.addEventListener('resize', checkIsMobile)
-    
+
     return () => window.removeEventListener('resize', checkIsMobile)
   }, [])
 
@@ -200,7 +200,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     ) {
       return
     }
-    
+
     setCommandHistory(prev => [...prev, { type: isCommand ? "command" : "response", content: command }])
     setHistoryIndex(-1)
   }
@@ -546,7 +546,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
                     </div>
                   ))}
                 </div>
-              )}              
+              )}
             </div>
           </motion.div>
         </motion.div>

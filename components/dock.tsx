@@ -38,8 +38,8 @@ export function Dock({ onOpenPanel, activePanels }: DockProps) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div className="bg-background backdrop-blur-lg border border-muted/30 rounded-full shadow-lg px-4 py-2 mb-2 hide-scrollbar max-w-full">
-        <TooltipProvider>
+      <div className="bg-background backdrop-blur-lg border border-muted/30 rounded-full shadow-lg px-4 py-2  hide-scrollbar max-w-full">
+        <TooltipProvider delayDuration={200}>
           <div className="flex items-center gap-2 min-w-max">
             {DOCK_ITEMS.map(({ panel, icon: Icon, label, shortcut }) => (
               <Tooltip key={panel} delayDuration={200}>
@@ -55,8 +55,13 @@ export function Dock({ onOpenPanel, activePanels }: DockProps) {
                     <Icon className="h-3 w-3" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p>{label}</p>
+                <TooltipContent
+                  side="top"
+                  sideOffset={12}
+                  avoidCollisions={false}
+                  className="!z-[99999] pointer-events-none"
+                >
+                  <p className="whitespace-nowrap">{label}</p>
                 </TooltipContent>
               </Tooltip>
             ))}

@@ -1,6 +1,19 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from "@/components/theme-provider"
+import { Caveat, Press_Start_2P } from 'next/font/google'
+
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-caveat',
+})
+
+const pressStart2P = Press_Start_2P({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-pixel',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://portfolio-luvp21s-projects.vercel.app'),
@@ -54,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${caveat.variable} ${pressStart2P.variable}`}>
       <ThemeProvider>
         {children}
       </ThemeProvider>
