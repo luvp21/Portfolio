@@ -116,10 +116,9 @@
 
 
   .mobile-grid-light {
-    background-color: #F0EBE3;
-    background-image:
-      repeating-linear-gradient(45deg, rgba(16, 16, 16, 0.08) 0, rgba(16, 16, 16, 0.08) 1px, transparent 1px, transparent 30px),
-      repeating-linear-gradient(135deg, rgba(16, 16, 16, 0.08) 0, rgba(16, 16, 16, 0.08) 1px, transparent 1px, transparent 30px);
+    background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 50px 50px;
   }
 
   .mobile-grid-dark {

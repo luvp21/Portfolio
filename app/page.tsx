@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useEffect, useState, useRef, useCallback } from "react"
-import { User, Briefcase, Moon, Sun, X, History, RotateCcw, FileText, Layers, Award } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
+import { User, Briefcase, History, RotateCcw, FileText, Layers, Award } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
@@ -17,7 +17,7 @@ import { ExperienceTimeline } from "@/components/experience-timeline"
 import { Dock } from "@/components/dock"
 import { Sandbox } from "@/components/Sandbox"
 import { PixelatedBanner } from "@/components/pixelated-banner"
-import { ThemeToggleButton } from "@/components/theme-toggle";
+import { ThemeToggleButton } from "@/components/theme-toggle"
 
 type PanelType = "about" | "projects" | "experience" | "message" | "stack" | "achievements"
 
@@ -41,7 +41,7 @@ function useResponsive() {
 
   useEffect(() => {
     const checkResponsive = () => {
-      const width = window.innerWidth
+      const width = typeof window !== "undefined" ? window.innerWidth : 1024
       setIsMobile(width < 768) // md breakpoint
       setIsTablet(width >= 768 && width < 1024) // lg breakpoint
     }
@@ -140,80 +140,104 @@ export default function PortfolioInterface() {
   const [showCommandBar, setShowCommandBar] = useState(false)
   const [highestZIndex, setHighestZIndex] = useState(1)
   const { isMobile, isTablet } = useResponsive()
-  const canvasRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLDivElement | null>(null)
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 })
-  const [panels, setPanels] = useState<Record<PanelType, PanelState>>({} as Record<PanelType, PanelState>)
+  // Lazy initialize panels so mobile gets active panels on first client render
+  const [panels, setPanels] = useState<Record<PanelType, PanelState>>(() => {
+    // If window is available (client) compute initial panels immediately
+    if (typeof window !== "undefined") {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const initial = createDefaultPanelState(vw, vh)
+
+      // If client width is mobile — activate all panels from start
+      if (vw < 768) {
+        Object.keys(initial).forEach((k) => {
+          const p = k as PanelType
+          initial[p] = { ...initial[p], active: true, minimized: false }
+        })
+      }
+
+      return initial
+    }
+
+    // SSR fallback — empty (will be corrected on mount)
+    return {} as Record<PanelType, PanelState>
+  })
   const [isInitialized, setIsInitialized] = useState(false)
   const [resetKey, setResetKey] = useState(0) // Used to force re-render
 
   const { setTheme, theme } = useTheme()
 
-  // Initialize viewport size and panels
-  // Initialize viewport size and panels
+  // Initializer effect: loads saved desktop positions, but NEVER overwrites mobile initial active panels
   useEffect(() => {
-    if (!canvasRef.current || isInitialized) return;
+    if (isInitialized) return
 
-    // Get viewport size
-    const viewport = canvasRef.current.getBoundingClientRect()
-    const currentViewportSize = { width: viewport.width, height: viewport.height }
-    setViewportSize(currentViewportSize)
+    // prefer canvasRef dimensions when available (desktop), otherwise window
+    const rect = canvasRef.current?.getBoundingClientRect()
+    const vw = rect ? rect.width : (typeof window !== "undefined" ? window.innerWidth : 1024)
+    const vh = rect ? rect.height : (typeof window !== "undefined" ? window.innerHeight : 768)
+    setViewportSize({ width: vw, height: vh })
 
-    // Default panels based on viewport
-    const initialPanels = createDefaultPanelState(currentViewportSize.width, currentViewportSize.height)
-
-    // If we're on mobile -> ALWAYS use initial panels and activate them (ignore saved)
-    if (isMobile) {
-      const mobilePanels = { ...initialPanels }
-      Object.keys(mobilePanels).forEach((key) => {
-        const p = key as PanelType
-        mobilePanels[p] = {
-          ...mobilePanels[p],
-          active: true,
-          minimized: false,
-        }
+    // If mobile viewport, ensure panels are active and ignore saved positions
+    if (vw < 768) {
+      // create fresh defaults for this viewport and activate them
+      const initialPanels = createDefaultPanelState(vw, vh)
+      Object.keys(initialPanels).forEach((k) => {
+        const p = k as PanelType
+        initialPanels[p] = { ...initialPanels[p], active: true, minimized: false }
       })
-      setPanels(mobilePanels)
+      setPanels(initialPanels)
       setIsInitialized(true)
       return
     }
 
-    // Desktop / Tablet: try to load saved positions
-    const saved = localStorage.getItem("portfolioPanels")
-    if (saved) {
-      try {
+    // Desktop / tablet: attempt to load saved positions
+    try {
+      const saved = localStorage.getItem("portfolioPanels")
+      if (saved) {
         const savedPanels = JSON.parse(saved)
-
-        // Ensure saved panels are within viewport boundaries
-        const constrainedPanels = constrainPanelsToViewport(
-          savedPanels,
-          currentViewportSize.width,
-          currentViewportSize.height
-        )
-
-        setPanels(constrainedPanels)
-      } catch (e) {
-        console.error("Error loading saved panels:", e)
-        setPanels(initialPanels)
+        const constrained = constrainPanelsToViewport(savedPanels, vw, vh)
+        setPanels(constrained)
+      } else {
+        setPanels(createDefaultPanelState(vw, vh))
       }
-    } else {
-      // No saved panels → use defaults (desktop)
-      setPanels(initialPanels)
+    } catch (e) {
+      console.error("Error loading saved panels:", e)
+      setPanels(createDefaultPanelState(vw, vh))
     }
 
     setIsInitialized(true)
-  }, [canvasRef, isInitialized, isMobile, resetKey])
+  }, [isInitialized, resetKey])
 
-  // Update viewport size on window resize
+  // If user switches to mobile after initialization, force-activate panels and ignore saved
+  useEffect(() => {
+    if (!isInitialized) return
+    if (!isMobile) return
+
+    // Mobile activated after initialization — create fresh mobile panels
+    const vw = typeof window !== "undefined" ? window.innerWidth : viewportSize.width || 375
+    const vh = typeof window !== "undefined" ? window.innerHeight : viewportSize.height || 667
+    const initialPanels = createDefaultPanelState(vw, vh)
+    Object.keys(initialPanels).forEach((k) => {
+      const p = k as PanelType
+      initialPanels[p] = { ...initialPanels[p], active: true, minimized: false }
+    })
+    setPanels(initialPanels)
+    setViewportSize({ width: vw, height: vh })
+    // note: do NOT set isInitialized false — keep flows stable
+  }, [isMobile, isInitialized])
+
+  // Update viewport size on window resize (and constrain panels)
   useEffect(() => {
     const handleResize = () => {
-      if (canvasRef.current) {
-        const viewport = canvasRef.current.getBoundingClientRect()
-        setViewportSize({ width: viewport.width, height: viewport.height })
+      const rect = canvasRef.current?.getBoundingClientRect()
+      const vw = rect ? rect.width : window.innerWidth
+      const vh = rect ? rect.height : window.innerHeight
+      setViewportSize({ width: vw, height: vh })
 
-        // Constrain panels to new viewport size
-        if (isInitialized && Object.keys(panels).length > 0) {
-          setPanels(prev => constrainPanelsToViewport(prev, viewport.width, viewport.height))
-        }
+      if (isInitialized && Object.keys(panels).length > 0) {
+        setPanels(prev => constrainPanelsToViewport(prev, vw, vh))
       }
     }
 
@@ -221,10 +245,14 @@ export default function PortfolioInterface() {
     return () => window.removeEventListener("resize", handleResize)
   }, [isInitialized, panels])
 
-  // Save positions when they change
+  // Save positions when they change (desktop only)
   useEffect(() => {
     if (isInitialized && !isMobile && Object.keys(panels).length > 0) {
-      localStorage.setItem("portfolioPanels", JSON.stringify(panels))
+      try {
+        localStorage.setItem("portfolioPanels", JSON.stringify(panels))
+      } catch (e) {
+        console.error("Could not save panels to localStorage", e)
+      }
     }
   }, [panels, isMobile, isInitialized])
 
@@ -268,7 +296,11 @@ export default function PortfolioInterface() {
 
   const resetPanelPositions = () => {
     // Clear localStorage
-    localStorage.removeItem("portfolioPanels")
+    try {
+      localStorage.removeItem("portfolioPanels")
+    } catch (e) {
+      console.error("Could not remove portfolioPanels", e)
+    }
 
     // Reset state variables
     setHighestZIndex(1)
@@ -281,8 +313,8 @@ export default function PortfolioInterface() {
   const updatePanelPosition = (panel: PanelType, x: number, y: number) => {
     // Constrain panel position within viewport boundaries
     const dimensions = DEFAULT_PANEL_DIMENSIONS[panel]
-    const vw = viewportSize.width || window.innerWidth
-    const vh = viewportSize.height || window.innerHeight
+    const vw = viewportSize.width || (typeof window !== "undefined" ? window.innerWidth : dimensions.width)
+    const vh = viewportSize.height || (typeof window !== "undefined" ? window.innerHeight : dimensions.height)
     const constrainedX = Math.max(0, Math.min(x, vw - dimensions.width))
     const constrainedY = Math.max(0, Math.min(y, vh - dimensions.height))
 
@@ -298,7 +330,7 @@ export default function PortfolioInterface() {
   const togglePanel = (panel: PanelType) => {
     setPanels((prev) => {
       const newPanels = { ...prev }
-      const isOpening = !prev[panel].active
+      const isOpening = !prev[panel]?.active
 
       if (isOpening) {
         // Get default positions relative to viewport center
@@ -314,7 +346,7 @@ export default function PortfolioInterface() {
       } else {
         newPanels[panel] = {
           ...prev[panel],
-          active: !prev[panel].active,
+          active: !prev[panel]?.active,
           minimized: false,
           zIndex: highestZIndex + 1,
         }
@@ -435,11 +467,13 @@ export default function PortfolioInterface() {
 
       {/* Canvas Area */}
       <div className="relative flex-1 overflow-hidden">
-        {/* Pixelated Background Banner */}
-        <PixelatedBanner
-          isHidden={isInitialized && Object.values(panels).some(panel => panel.active)}
-          className="z-[9999]"
-        />
+        {/* Pixelated Background Banner - desktop only */}
+        {!isMobile && (
+          <PixelatedBanner
+            isHidden={isInitialized && Object.values(panels).some(panel => panel.active)}
+            className="z-[9999]"
+          />
+        )}
 
         {/* Mobile Layout */}
         {isMobile ? (
@@ -619,7 +653,7 @@ export default function PortfolioInterface() {
 
       {/* Footer - Only shows on desktop */}
       {isMobile ? (
-        // Desktop footer
+        // Mobile footer
         <div className=" bg-background/80 backdrop-blur-sm border-border/20 pt-3 border-t border-b">
           <div className="h-full px-4">
             <div className="text-sm text-muted-foreground/70">
