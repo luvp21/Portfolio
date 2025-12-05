@@ -17,6 +17,7 @@ import { ExperienceTimeline } from "@/components/experience-timeline"
 import { Dock } from "@/components/dock"
 import { Sandbox } from "@/components/Sandbox"
 import { PixelatedBanner } from "@/components/pixelated-banner"
+import { ThemeToggleButton } from "@/components/theme-toggle";
 
 type PanelType = "about" | "projects" | "experience" | "message" | "stack" | "achievements"
 
@@ -148,40 +149,59 @@ export default function PortfolioInterface() {
   const { setTheme, theme } = useTheme()
 
   // Initialize viewport size and panels
+  // Initialize viewport size and panels
   useEffect(() => {
-    if (canvasRef.current && !isInitialized) {
-      // Get viewport size
-      const viewport = canvasRef.current.getBoundingClientRect()
-      const currentViewportSize = { width: viewport.width, height: viewport.height }
-      setViewportSize(currentViewportSize)
+    if (!canvasRef.current || isInitialized) return;
 
-      // Initialize panels with viewport size
-      const initialPanels = createDefaultPanelState(currentViewportSize.width, currentViewportSize.height)
+    // Get viewport size
+    const viewport = canvasRef.current.getBoundingClientRect()
+    const currentViewportSize = { width: viewport.width, height: viewport.height }
+    setViewportSize(currentViewportSize)
 
-      // Try to load saved panel positions
-      const saved = localStorage.getItem("portfolioPanels")
-      if (saved) {
-        try {
-          const savedPanels = JSON.parse(saved)
+    // Default panels based on viewport
+    const initialPanels = createDefaultPanelState(currentViewportSize.width, currentViewportSize.height)
 
-          // Ensure saved panels are within viewport boundaries
-          const constrainedPanels = constrainPanelsToViewport(
-            savedPanels,
-            currentViewportSize.width,
-            currentViewportSize.height
-          )
-          setPanels(constrainedPanels)
-        } catch (e) {
-          console.error("Error loading saved panels:", e)
-          setPanels(initialPanels)
+    // If we're on mobile -> ALWAYS use initial panels and activate them (ignore saved)
+    if (isMobile) {
+      const mobilePanels = { ...initialPanels }
+      Object.keys(mobilePanels).forEach((key) => {
+        const p = key as PanelType
+        mobilePanels[p] = {
+          ...mobilePanels[p],
+          active: true,
+          minimized: false,
         }
-      } else {
+      })
+      setPanels(mobilePanels)
+      setIsInitialized(true)
+      return
+    }
+
+    // Desktop / Tablet: try to load saved positions
+    const saved = localStorage.getItem("portfolioPanels")
+    if (saved) {
+      try {
+        const savedPanels = JSON.parse(saved)
+
+        // Ensure saved panels are within viewport boundaries
+        const constrainedPanels = constrainPanelsToViewport(
+          savedPanels,
+          currentViewportSize.width,
+          currentViewportSize.height
+        )
+
+        setPanels(constrainedPanels)
+      } catch (e) {
+        console.error("Error loading saved panels:", e)
         setPanels(initialPanels)
       }
-
-      setIsInitialized(true)
+    } else {
+      // No saved panels → use defaults (desktop)
+      setPanels(initialPanels)
     }
-  }, [canvasRef, isInitialized, resetKey])
+
+    setIsInitialized(true)
+  }, [canvasRef, isInitialized, isMobile, resetKey])
 
   // Update viewport size on window resize
   useEffect(() => {
@@ -397,19 +417,19 @@ export default function PortfolioInterface() {
               variant="outline"
               size="icon"
               onClick={resetPanelPositions}
-              className="rounded-full relative group"
+              className="rounded-full relative group flex items-center justify-center border border-border/20 p-2"
+              aria-label="Reset panels"
+              title="Reset panels"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </Button>
+
+          <ThemeToggleButton
+            className="rounded-full flex items-center justify-center border border-border/20 p-2"
+            variant="circle"
+            start="top-right"
+          />
         </div>
       </header>
 
@@ -418,6 +438,7 @@ export default function PortfolioInterface() {
         {/* Pixelated Background Banner */}
         <PixelatedBanner
           isHidden={isInitialized && Object.values(panels).some(panel => panel.active)}
+          className="z-[9999]"
         />
 
         {/* Mobile Layout */}

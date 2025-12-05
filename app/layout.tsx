@@ -68,9 +68,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${caveat.variable} ${pressStart2P.variable}`}>
-      <ThemeProvider>
-        {children}
-      </ThemeProvider>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
