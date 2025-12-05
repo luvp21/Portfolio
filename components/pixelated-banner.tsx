@@ -168,14 +168,14 @@ export function PixelatedBanner({
           </h1>
 
           {/* Right bubble: move it a bit inward to avoid pushing off-screen */}
-          <div className="absolute -top-6 right-[-80px] md:right-[-120px] lg:right-[-60px]">
+          {/* <div className="absolute -top-6 right-[-80px] md:right-[-120px] lg:right-[-60px]">
             <div className="relative rotate-[12deg]">
               <div className="absolute inset-0 border-[3px] border-black/80 dark:border-white/70 rounded-[50%] scale-[1.25] pointer-events-none"></div>
               <p className="px-2 py-2 text-xs md:text-sm pixelated-text-small text-foreground/70 dark:text-foreground/40 select-none whitespace-nowrap">
                 press / for ?
               </p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
