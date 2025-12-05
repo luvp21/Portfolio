@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronUp, Building2, Briefcase, GraduationCap} from "lucide-react"
+import { ChevronDown, ChevronUp, Building2, Briefcase, GraduationCap } from "lucide-react"
 
 interface ExperienceItem {
   id: number
@@ -13,7 +13,8 @@ interface ExperienceItem {
   period: string
   description: string
   skills: string[]
-  icon: "company" | "education" | "freelance" | "organization"}
+  icon: "company" | "education" | "freelance" | "organization"
+}
 
 export function ExperienceTimeline() {
   // const [expandedItems, setExpandedItems] = useState<number[]>([1])
@@ -39,7 +40,7 @@ export function ExperienceTimeline() {
       company: "Computer Society of India - Nirma University",
       period: " Oct 2024 – Aug 2025",
       description:
-        "Developed CSI Nirma’s official websit.",
+        "Developed CSI Nirma’s official website.",
       skills: [
         "Node.js",
         "MongoDB",
@@ -54,7 +55,7 @@ export function ExperienceTimeline() {
       id: 3,
       title: "B.Tech in Computer Science and Engineering",
       company: "Nirma University",
-      period: "2024 – 2027",
+      period: "2023 – 2027",
       description:
         "Pursuing a B.Tech in Computer Science and Engineering at Nirma University.",
       skills: [
@@ -90,41 +91,35 @@ export function ExperienceTimeline() {
       {experiences.map((exp) => (
         <motion.div
           key={exp.id}
-          className="border rounded-lg overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: exp.id * 0.1 }}
+          className="py-1"
         >
-          <div
-            className="flex items-center justify-between p-4  bg-muted/30"
-            /* onClick={() => toggleExpand(exp.id)} */
-          >
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-full text-name">{getIcon(exp.icon)}</div>
-              <div>
-                <h3 className="text-lg text-name">{exp.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {exp.company} • {exp.period}
-                </p>
+          <div className="flex items-center justify-between px-4 bg-muted/30">
+            <div className="flex items-start w-full">
+              <div className="flex flex-col w-full">
+
+                <div className="flex w-full items-baseline justify-between">
+                  <h3 className="text-xl font-bold">{exp.title}</h3>
+                  <span className="text-md font-bold whitespace-nowrap">{exp.period}</span>
+                </div>
+
+                <p className="text-md text-primary">{exp.company}</p>
               </div>
             </div>
-            {/*
-            <Button variant="ghost" size="icon">
-              {expandedItems.includes(exp.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-            */}
           </div>
-          
+
           {/* expandedItems.includes(exp.id) && */}
-          
-          { (
+
+          {(
             <motion.div
-              className="p-4 border-t"
+              className="px-4"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
             >
-              <p className="mb-3 text-md">{exp.description}</p>
+              <p className="mb-3 text-md text-muted-foreground">{exp.description}</p>
               <div className="flex flex-wrap gap-1">
                 {exp.skills.map((skill) => (
                   <Badge key={skill} variant="secondary" className="text-xs">

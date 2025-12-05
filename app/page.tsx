@@ -55,12 +55,12 @@ function useResponsive() {
 
 // Default panel dimensions
 const DEFAULT_PANEL_DIMENSIONS: Record<PanelType, PanelDimensions> = {
-  about: { width: 450, height: 325 },
-  projects: { width: 450, height: 450 },
-  experience: { width: 450, height: 550 },
-  message: { width: 920, height: 495 },
-  stack: { width: 450, height: 380 },
-  achievements: { width: 450, height: 380 },
+  about: { width: 450, height: 300 },
+  projects: { width: 500, height: 600 },
+  experience: { width: 470, height: 550 },
+  message: { width: 800, height: 500 },
+  stack: { width: 450, height: 270 },
+  achievements: { width: 450, height: 300 },
 }
 
 // Calculate panel positions relative to the center of the viewport
@@ -454,7 +454,7 @@ export default function PortfolioInterface() {
                   <ProjectCard
                     title="Interactive Portfolio"
                     description="A canvas-based portfolio with draggable panels and Command Terminal"
-                    tags={["Next.js", "Framer Motion", "Tailwind"]}
+                    tags={["Next.js", "TypeScript", "Tailwind", "React", "Vercel"]}
                     image="/portfolio.png"
                     githubUrl="https://github.com/luvp21/Portfolio"
                     liveUrl="https://portfolio-luvp21s-projects.vercel.app/"
@@ -462,15 +462,13 @@ export default function PortfolioInterface() {
                   <ProjectCard
                     title="EV Rental Website"
                     description="EV rental system with secure KYC, real-time tracking, and automated payments."
-                    tags={["React", "Tailwind"]}
-                    image="/erental.png"
+                    tags={["React", "Tailwind", "MongoDB", "Node.js", "Vercel"]} image="/erental.png"
                     githubUrl="https://github.com/mihir1816/Deep-Drillers-2.0"
                   />
                   <ProjectCard
                     title="Excalidraw Clone"
                     description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
-                    tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
-                    image="/excalidraw.png"
+                    tags={["TypeScript", "Next.js", "Tailwind", "Prisma", "PostgreSQL", "Socket.io"]} image="/excalidraw.png"
                     githubUrl="https://github.com/luvp21/Draw-App"
                   />
                 </div>,
@@ -493,7 +491,7 @@ export default function PortfolioInterface() {
           <div
             key={`canvas-container-${resetKey}`}
             ref={canvasRef}
-            className="absolute w-full h-full grid-snap-background rounded-lg border-cborder border-2"
+            className="absolute w-full h-full grid-snap-background rounded-lg"
           >
             {/* Desktop Panels */}
             {isInitialized && viewportSize.width > 0 && viewportSize.height > 0 &&
@@ -545,7 +543,7 @@ export default function PortfolioInterface() {
                     defaultHeight={DEFAULT_PANEL_DIMENSIONS[panelType].height}
                     isPinned={panel.pinned}
                     onPinChange={(isPinned) => togglePinPanel(panelType, isPinned)}
-                    className="border-4 border-card"
+                    className="border border-blue-300/10"
                     canvasBoundaries={viewportSize.width > 0 && viewportSize.height > 0 ? viewportSize : { width: window.innerWidth, height: window.innerHeight }}
                   >
                     {panelType === "about" && <ProfileCard />}
@@ -555,22 +553,21 @@ export default function PortfolioInterface() {
                         <ProjectCard
                           title="Interactive Portfolio"
                           description="A canvas-based portfolio with draggable panels and Command Terminal"
-                          tags={["Next.js", "Framer Motion", "Tailwind"]}
-                          image="/portfolio.png"
+                          tags={["Next.js", "TypeScript", "Tailwind", "React", "Vercel"]} image="/portfolio.png"
                           githubUrl="https://github.com/luvp21/Portfolio"
                           liveUrl="https://portfolio-luvp21s-projects.vercel.app/"
                         />
                         <ProjectCard
                           title="EV Rental Website"
                           description="EV rental system with secure KYC, real-time tracking, and automated payments."
-                          tags={["React", "Tailwind"]}
+                          tags={["React", "Tailwind", "MongoDB", "Node.js", "Vercel"]}
                           image="/erental.png"
                           githubUrl="https://github.com/mihir1816/Deep-Drillers-2.0"
                         />
                         <ProjectCard
                           title="Excalidraw Clone"
                           description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
-                          tags={["TypeScript", "Next.js", "Tailwind", "Prisma"]}
+                          tags={["TypeScript", "Next.js", "Tailwind", "Prisma", "PostgreSQL", "Socket.io"]}
                           image="/excalidraw.png"
                           githubUrl="https://github.com/luvp21/Draw-App"
                         />
@@ -582,7 +579,7 @@ export default function PortfolioInterface() {
                     {panelType === "stack" && <TechStack />}
 
                     {panelType === "experience" && (
-                      <div className=" overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar border-cborder">
+                      <div className=" overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar">
                         <ExperienceTimeline />
                       </div>
                     )}
@@ -606,7 +603,7 @@ export default function PortfolioInterface() {
           <div className="h-full px-4">
             <div className="text-sm text-muted-foreground/70">
               // Built with Next.js, Tailwind, and Supabase;{"        "}
-              <span className="text-name">thanks()</span>;
+              <span className="text-blue-400">thanks()</span>;
             </div>
           </div>
         </div>
@@ -617,7 +614,7 @@ export default function PortfolioInterface() {
             {/* Left side - Tech stack */}
             <div className="flex-1 text-md text-muted-foreground/70">
               // Built with Next.js, Tailwind, and Supabase;{" "}
-              <span className="text-name">thanks()</span>;
+              <span className="text-blue-400">thanks()</span>;
             </div>
 
             {/* Center - Dock (center column, perfectly centered) */}

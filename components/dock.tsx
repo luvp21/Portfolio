@@ -22,13 +22,13 @@ const DOCK_ITEMS: {
   label: string
   shortcut?: string
 }[] = [
-  { panel: "about", icon: User, label: "About" },
-  { panel: "projects", icon: Briefcase, label: "Projects" },
-  { panel: "experience", icon: History, label: "Experience" },
-  { panel: "message", icon: FileText, label: "Message Constellation" },
-  { panel: "achievements", icon: Award, label: "Achievements" },
-  { panel: "stack", icon: Layers, label: "Tech Stack" },
-]
+    { panel: "about", icon: User, label: "About" },
+    { panel: "projects", icon: Briefcase, label: "Projects" },
+    { panel: "experience", icon: History, label: "Experience" },
+    { panel: "achievements", icon: Award, label: "Achievements" },
+    { panel: "stack", icon: Layers, label: "Tech Stack" },
+    { panel: "message", icon: FileText, label: "Message Constellation" }
+  ]
 
 export function Dock({ onOpenPanel, activePanels }: DockProps) {
   return (

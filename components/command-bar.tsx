@@ -13,7 +13,6 @@ import {
   FileText,
   Award,
   Layers,
-  HelpCircle,
   Code,
   Github,
   Linkedin,
@@ -33,104 +32,71 @@ interface CommandBarProps {
   onExecuteCommand: (command: string) => void
 }
 
-interface CommandHistoryItem {
-  type: "command" | "response"
-  content: string | React.ReactNode
-}
-
 export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarProps) {
   const [inputValue, setInputValue] = useState("")
-  const [commandHistory, setCommandHistory] = useState<CommandHistoryItem[]>([])
-  const [historyIndex, setHistoryIndex] = useState(-1)
   const [isMobile, setIsMobile] = useState(false)
+  const [highlightIndex, setHighlightIndex] = useState(0)
+  const [mouseActive, setMouseActive] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
-  const historyRef = useRef<HTMLDivElement | null>(null)
+  const menuScrollRef = useRef<HTMLDivElement | null>(null)
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const mouseMoveTimerRef = useRef<number | null>(null)
   const { theme } = useTheme()
 
   // Detect mobile device
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window)
+      setIsMobile(window.innerWidth < 768 || "ontouchstart" in window)
     }
-
     checkIsMobile()
-    window.addEventListener('resize', checkIsMobile)
-
-    return () => window.removeEventListener('resize', checkIsMobile)
+    window.addEventListener("resize", checkIsMobile)
+    return () => window.removeEventListener("resize", checkIsMobile)
   }, [])
 
-  // Available commands - removed blog, theme, and project-specific commands
-  const navigationCommands = ["about", "projects", "experience", "Message", "achievements", "stack"]
+  // Command groups
+  const navigationCommands = ["about", "projects", "experience", "achievements", "stack", "Message"]
   const appearanceCommands = ["dark", "light"]
   const toolsCommands = ["reset"]
   const socialCommands = ["github", "linkedin", "twitter", "email"]
-  // const messageCommands = ["addmessage", "viewmessages", "constellation"]
-  const systemCommands = ["help", "clear", "close", "downloadcv"]
+  const systemCommands = ["close", "downloadcv"]
 
-  // All commands
   const allCommands = [
     ...navigationCommands,
     ...appearanceCommands,
     ...toolsCommands,
     ...socialCommands,
-    // ...messageCommands,
     ...systemCommands,
   ]
 
-  // Command descriptions for help
+  // Descriptions
   const commandDescriptions: Record<string, string> = {
-    // Navigation
-    about: "Open the About Me panel",
-    projects: "Open the Projects panel",
-    experience: "Open the Experience panel",
-    Message: "Open the Message Constellation panel",
+    about: "Open/Close the About Me panel",
+    projects: "Open/Close the Projects panel",
+    experience: "Open/Close the Experience panel",
+    Message: "Open/Close the Message Constellation panel",
     skills: "View my technical skills",
-
-    // Appearance
     dark: "Switch to dark mode",
     light: "Switch to light mode",
-
-    // Tools
-    achievements: "Open the Achievements panel",
-    stack: "Open the Tech Stack panel",
+    achievements: "Open/Close the Achievements panel",
+    stack: "Open/Close the Tech Stack panel",
     reset: "Reset panel positions",
-
-    // Social
     github: "Visit my GitHub profile",
     linkedin: "Connect with me on LinkedIn",
     twitter: "Follow me on Twitter",
     email: "Send me an email",
-
-    // Message Constellation
-    // addmessage: "Add a message to the constellation",
-    // viewmessages: "View all constellation messages",
-    // constellation: "Open the message constellation",
-
-    // System
-    help: "Show available commands",
-    clear: "Clear command history",
     close: "Close the command terminal",
     downloadcv: "Download my resume/CV",
   }
 
   useEffect(() => {
     if (open) {
-      // Focus input when menu opens
       setTimeout(() => inputRef.current?.focus(), 0)
     } else {
       setInputValue("")
-      setHistoryIndex(-1)
     }
   }, [open])
 
-  // Scroll to bottom of history when it changes
-  useEffect(() => {
-    if (historyRef.current) {
-      historyRef.current.scrollTop = historyRef.current.scrollHeight
-    }
-  }, [commandHistory])
-
-  // Fuzzy search function
+  // Fuzzy search (unchanged)
   const fuzzySearch = (query: string, text: string): number => {
     if (query.length === 0) return 0
 
@@ -141,96 +107,84 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     let queryIndex = 0
     let consecutiveMatches = 0
 
-    // Direct match gets highest score
     if (text.includes(query)) {
       score += 100
-      // Bonus for match at start
-      if (text.startsWith(query)) {
-        score += 50
-      }
+      if (text.startsWith(query)) score += 50
     }
 
-    // Check for partial matches
     for (let i = 0; i < text.length; i++) {
       if (queryIndex < query.length && text[i] === query[queryIndex]) {
         queryIndex++
         consecutiveMatches++
-        score += consecutiveMatches * 2 // Consecutive matches are worth more
+        score += consecutiveMatches * 2
       } else {
         consecutiveMatches = 0
       }
     }
 
-    // If we matched all query characters in order
-    if (queryIndex === query.length) {
-      score += 20
-    }
+    if (queryIndex === query.length) score += 20
 
     return score
   }
 
-  // Get suggestions based on fuzzy search
-  const getSuggestions = () => {
-    if (inputValue.trim() === "") {
-      return [] // Don't show suggestions when input is empty
-    } else {
-      // Score each command based on fuzzy search
-      const scoredCommands = allCommands.map((cmd) => ({
-        command: cmd,
-        score: fuzzySearch(inputValue, cmd),
-      }))
-
-      // Filter out commands with zero score and sort by score (descending)
-      return scoredCommands
-        .filter((item) => item.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .map((item) => item.command)
-        .slice(0, 8) // Limit to 8 suggestions
-    }
+  // label map
+  const labelMap: Record<string, string> = {
+    about: "About",
+    projects: "Portfolio",
+    experience: "Experience",
+    Message: "Message",
+    achievements: "Achievements",
+    stack: "Tech Stack",
+    dark: "Dark mode",
+    light: "Light mode",
+    reset: "Reset layout",
+    github: "GitHub",
+    linkedin: "LinkedIn",
+    twitter: "Twitter",
+    email: "Email",
+    close: "Close",
+    downloadcv: "Download CV",
   }
 
-  const addToHistory = (command: string | React.ReactNode, isCommand = true) => {
-    // Don't add duplicates in a row (only check for string commands)
-    if (
-      typeof command === 'string' &&
-      commandHistory.length > 0 &&
-      typeof commandHistory[commandHistory.length - 1].content === 'string' &&
-      commandHistory[commandHistory.length - 1].content === command &&
-      commandHistory[commandHistory.length - 1].type === "command"
-    ) {
-      return
-    }
+  // ---------- Scored suggestions with stricter acceptance ----------
+  const scoredSuggestions = (() => {
+    const q = inputValue.trim().toLowerCase()
+    if (q === "") return [] as string[]
 
-    setCommandHistory(prev => [...prev, { type: isCommand ? "command" : "response", content: command }])
-    setHistoryIndex(-1)
-  }
+    const scored = allCommands
+      .map((cmd) => {
+        const label = (labelMap[cmd] ?? cmd).toLowerCase()
+        const keyScore = fuzzySearch(q, cmd.toLowerCase())
+        const labelScore = fuzzySearch(q, label)
+        const combined = Math.max(keyScore, labelScore)
+        return { command: cmd, combined, keyScore, labelScore }
+      })
+      .filter((s) => {
+        const cmd = s.command
+        const label = (labelMap[cmd] ?? cmd).toLowerCase()
+        const startsWithOK = q.length <= cmd.length && cmd.toLowerCase().startsWith(q)
+        const labelContains = label.includes(q)
+        const fuzzyOK = s.combined >= 120
+        return startsWithOK || labelContains || fuzzyOK
+      })
+      .sort((a, b) => b.combined - a.combined)
+      .slice(0, 8)
 
-  const getCommandsOnly = () => {
-    return commandHistory
-      .filter((item) => item.type === "command" && typeof item.content === "string")
-      .map((item) => item.content as string)
+    return scored.map((s) => s.command)
+  })()
+
+  const matchesInput = (cmd: string) => {
+    if (inputValue.trim() === "") return true
+    return scoredSuggestions.includes(cmd)
   }
 
   const handleSelect = (value: string) => {
-    // Make sure value is a valid command
     if (!allCommands.includes(value)) {
-      addToHistory(value)
-      addToHistory(`Command not found: ${value}`, false)
       setInputValue("")
       return
     }
 
-    addToHistory(value)
-
-    if (value === "clear") {
-      setCommandHistory([])
-    } else if (value === "help") {
-      // Add help content to history
-      addToHistory(renderHelpContent(), false)
-    } else if (value === "close") {
-      onOpenChange(false)
-    } else if (socialCommands.includes(value)) {
-      // Handle social links
+    if (socialCommands.includes(value)) {
       let url = ""
       switch (value) {
         case "github":
@@ -247,12 +201,13 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
           break
       }
       window.open(url, "_blank")
-      addToHistory(`Opening ${value}...`, false)
+      onOpenChange(false)
     } else if (value === "downloadcv") {
       window.open("/Luv.pdf", "_blank")
-      addToHistory("Downloading CV...", false)
+      onOpenChange(false)
+    } else if (value === "close") {
+      onOpenChange(false)
     } else {
-      // Execute regular command
       onExecuteCommand(value)
       onOpenChange(false)
     }
@@ -260,210 +215,237 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     setInputValue("")
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && inputValue) {
-      // First check for exact matches
-      const exactMatch = allCommands.find((cmd) => cmd.toLowerCase() === inputValue.toLowerCase())
+  // Helper: filtered & ordered sections
+  const getFilteredSections = () => {
+    const sections: { title: string; items: string[] }[] = [
+      { title: "Menu", items: navigationCommands },
+      { title: "Appearance", items: appearanceCommands },
+      { title: "Tools", items: toolsCommands },
+      { title: "Social", items: socialCommands },
+      { title: "System", items: systemCommands },
+    ]
 
+    const filtered = sections
+      .map((section) => {
+        let items = section.items.filter((cmd) => matchesInput(cmd))
+        if (inputValue.trim() !== "") {
+          items = items.sort((a, b) => {
+            const ia = scoredSuggestions.indexOf(a)
+            const ib = scoredSuggestions.indexOf(b)
+            return ia - ib
+          })
+        }
+        return { title: section.title, items }
+      })
+      .filter((s) => s.items.length > 0)
+
+    return filtered
+  }
+
+  // flat visible list in render order
+  const visibleList = (() => {
+    const sections = getFilteredSections()
+    return sections.flatMap((s) => s.items)
+  })()
+
+  // keyboard nav + auto-scroll behavior
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      if (visibleList.length === 0) return
+      setMouseActive(false)
+      setHighlightIndex((prev) => {
+        const next = prev + 1
+        // stop at bottom
+        return next >= visibleList.length ? prev : next
+      })
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault()
+      if (visibleList.length === 0) return
+      setMouseActive(false)
+      setHighlightIndex((prev) => {
+        const next = prev - 1
+        // stop at top
+        return next < 0 ? prev : next
+      })
+    } else if (e.key === "Enter") {
+      const exactMatch = allCommands.find((cmd) => cmd.toLowerCase() === inputValue.toLowerCase())
       if (exactMatch) {
         handleSelect(exactMatch)
-      } else {
-        // If no exact match, check for fuzzy matches and use the top result
-        const suggestions = getSuggestions()
-        if (suggestions.length > 0) {
-          handleSelect(suggestions[0])
-        } else if (inputValue.trim() !== "") {
-          // No matches at all
-          addToHistory(inputValue)
-          addToHistory(`Command not found: ${inputValue}`, false)
-          setInputValue("")
-        }
+        return
+      }
+      if (visibleList.length > 0) {
+        handleSelect(visibleList[highlightIndex])
       }
     } else if (e.key === "Escape") {
       onOpenChange(false)
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault()
-      const commandsOnly = getCommandsOnly()
-      if (commandsOnly.length > 0) {
-        const newIndex = historyIndex < commandsOnly.length - 1 ? historyIndex + 1 : historyIndex
-        setHistoryIndex(newIndex)
-        const commandIndex = commandsOnly.length - 1 - newIndex
-        if (commandIndex >= 0 && commandIndex < commandsOnly.length) {
-          setInputValue(commandsOnly[commandIndex])
-        }
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault()
-      const commandsOnly = getCommandsOnly()
-      if (historyIndex > 0) {
-        const newIndex = historyIndex - 1
-        setHistoryIndex(newIndex)
-        const commandIndex = commandsOnly.length - 1 - newIndex
-        if (commandIndex >= 0 && commandIndex < commandsOnly.length) {
-          setInputValue(commandsOnly[commandIndex])
-        }
-      } else if (historyIndex === 0) {
-        setHistoryIndex(-1)
-        setInputValue("")
-      }
     } else if (e.key === "Tab" && inputValue) {
       e.preventDefault()
-      // Simple tab completion
       const matches = allCommands.filter((cmd) => cmd.startsWith(inputValue.toLowerCase()))
-      if (matches.length === 1) {
-        setInputValue(matches[0])
-      }
+      if (matches.length === 1) setInputValue(matches[0])
     }
   }
 
-  // Get icon for command
+  // scroll highlighted item into view when highlightIndex or visibleList changes
+  useEffect(() => {
+    const cmd = visibleList[highlightIndex]
+    if (!cmd) return
+    const el = itemRefs.current[cmd]
+    if (!el) return
+    el.scrollIntoView({ block: "nearest", behavior: "smooth" })
+  }, [highlightIndex, visibleList])
+
+  // Reset highlight when input changes or menu opens
+  useEffect(() => {
+    setHighlightIndex(0)
+  }, [inputValue, open])
+
+  // Mouse movement handler: enable mouseActive for a short window after real movement
+  const onMenuMouseMove = () => {
+    // enable mouse interactions
+    setMouseActive(true)
+    // clear previous timer
+    if (mouseMoveTimerRef.current) {
+      window.clearTimeout(mouseMoveTimerRef.current)
+      mouseMoveTimerRef.current = null
+    }
+    // disable mouseActive after 1500ms of no movement
+    mouseMoveTimerRef.current = window.setTimeout(() => {
+      setMouseActive(false)
+      mouseMoveTimerRef.current = null
+    }, 1500)
+  }
+
+  // Icon mapping
   const getCommandIcon = (command: string) => {
     switch (command) {
-      // Navigation
       case "about":
-        return <User className="h-3 w-3" />
+        return <User className="h-4 w-4" />
       case "projects":
-        return <Briefcase className="h-3 w-3" />
+        return <Briefcase className="h-4 w-4" />
       case "experience":
-        return <History className="h-3 w-3" />
+        return <History className="h-4 w-4" />
       case "contact":
-        return <Mail className="h-3 w-3" />
+        return <Mail className="h-4 w-4" />
       case "resume":
-        return <FileText className="h-3 w-3" />
+        return <FileText className="h-4 w-4" />
       case "skills":
-        return <Code className="h-3 w-3" />
-
-      // Appearance
+        return <Code className="h-4 w-4" />
       case "dark":
-        return <Moon className="h-3 w-3" />
+        return <Moon className="h-4 w-4" />
       case "light":
-        return <Sun className="h-3 w-3" />
-
-      // Tools
+        return <Sun className="h-4 w-4" />
       case "achievements":
-        return <Award className="h-3 w-3" />
+        return <Award className="h-4 w-4" />
       case "stack":
-        return <Layers className="h-3 w-3" />
+        return <Layers className="h-4 w-4" />
       case "reset":
-        return <RotateCcw className="h-3 w-3" />
-
-      // Social
+        return <RotateCcw className="h-4 w-4" />
       case "github":
-        return <Github className="h-3 w-3" />
+        return <Github className="h-4 w-4" />
       case "linkedin":
-        return <Linkedin className="h-3 w-3" />
+        return <Linkedin className="h-4 w-4" />
       case "twitter":
-        return <Twitter className="h-3 w-3" />
+        return <Twitter className="h-4 w-4" />
       case "email":
-        return <Mail className="h-3 w-3" />
-
-      // Message Constellation
+        return <Mail className="h-4 w-4" />
       case "addmessage":
-        return <Send className="h-3 w-3" />
+        return <Send className="h-4 w-4" />
       case "viewmessages":
-        return <MessageSquare className="h-3 w-3" />
+        return <MessageSquare className="h-4 w-4" />
       case "constellation":
-        return <Star className="h-3 w-3" />
-
-      // System
-      case "help":
-        return <HelpCircle className="h-3 w-3" />
-      case "clear":
-        return <Code className="h-3 w-3" />
+        return <Star className="h-4 w-4" />
       case "close":
-        return <X className="h-3 w-3" />
+        return <X className="h-4 w-4" />
       case "downloadcv":
-        return <Download className="h-3 w-3" />
-
+        return <Download className="h-4 w-4" />
       default:
-        return <HelpCircle className="h-3 w-3" />
+        return <X className="h-4 w-4" />
     }
   }
 
-  // Render help content with terminal-style formatting
-  const renderHelpContent = (): React.ReactNode => {
-    const accentColor = theme === "dark" ? "#A374FF" : "hsl(var(--name))"
+  // Labels (same as before)
+  const getCommandLabel = (key: string) => {
+    const map: Record<string, string> = {
+      about: "About",
+      projects: "Portfolio",
+      experience: "Experience",
+      Message: "Message",
+      achievements: "Achievements",
+      stack: "Tech Stack",
+      dark: "Dark mode",
+      light: "Light mode",
+      reset: "Reset layout",
+      github: "GitHub",
+      linkedin: "LinkedIn",
+      twitter: "Twitter",
+      email: "Email",
+      close: "Close",
+      downloadcv: "Download CV",
+    }
+    return map[key] ?? key
+  }
+
+  // Renders menu content
+  const renderMenuContent = (): React.ReactNode => {
+    const filteredSections = getFilteredSections()
+
+    if (inputValue.trim() !== "" && filteredSections.length === 0) {
+      return <div className="p-4 text-sm text-muted-foreground">No matching commands found</div>
+    }
 
     return (
-      <div className="p-2 text-sm rounded">
-        <div className="flex items-center text-muted-foreground mb-3">
-          <span className="mr-2 font-mono">{">"}</span>
-          <span className="mr-1" style={{ color: accentColor }}>
-            _
-          </span>
-          <span>help</span>
-        </div>
+      <div className="p-3">
+        {filteredSections.map((section) => (
+          <div key={section.title} className="mb-3">
+            <div className="text-xs font-medium text-muted-foreground mb-2">{section.title}</div>
+            <div className="flex flex-col gap-2">
+              {section.items.map((cmd) => {
+                const label = getCommandLabel(cmd)
+                const desc = commandDescriptions[cmd] ?? ""
+                const indexInVisible = visibleList.indexOf(cmd)
+                const isActive = indexInVisible === highlightIndex
 
-        <div className="mb-3">
-          <div className="text-xs font-medium text-muted-foreground mb-1">Navigation</div>
-          <div className="grid grid-cols-1 gap-1">
-            {navigationCommands.map((cmd) => (
-              <div key={cmd} className="flex items-center">
-                {getCommandIcon(cmd)}
-                <span className="ml-2 mr-2">{cmd}</span>
-                <span className="text-xs text-muted-foreground">- {commandDescriptions[cmd]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+                return (
+                  <button
+                    key={cmd}
+                    ref={(el) => { itemRefs.current[cmd] = el }}
+                    type="button"
+                    onClick={() => handleSelect(cmd)}
+                    onMouseEnter={() => {
+                      // only change highlight via mouse if user actually moved the mouse recently
+                      if (mouseActive && indexInVisible >= 0) {
+                        setHighlightIndex(indexInVisible)
+                      }
+                    }}
+                    className={
+                      "w-full flex items-center justify-between rounded-md px-3 py-2 transition-colors " +
+                      (isActive
+                        ? "bg-muted rounded-xl"
+                        : "hover:bg-muted/50 rounded-xl"
+                      )
+                    }
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-muted-foreground">{getCommandIcon(cmd)}</div>
 
-        <div className="mb-3">
-          <div className="text-xs font-medium text-muted-foreground mb-1">Appearance</div>
-          <div className="grid grid-cols-1 gap-1">
-            {appearanceCommands.map((cmd) => (
-              <div key={cmd} className="flex items-center">
-                {getCommandIcon(cmd)}
-                <span className="ml-2 mr-2">{cmd}</span>
-                <span className="text-xs text-muted-foreground">- {commandDescriptions[cmd]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+                      <div className="flex flex-col text-left">
+                        <span className="text-foreground text-sm leading-none">{label}</span>
+                        {desc && <span className="text-xs text-muted-foreground leading-none mt-0.5">{desc}</span>}
+                      </div>
+                    </div>
 
-        <div className="mb-3">
-          <div className="text-xs font-medium text-muted-foreground mb-1">Tools</div>
-          <div className="grid grid-cols-1 gap-1">
-            {toolsCommands.map((cmd) => (
-              <div key={cmd} className="flex items-center">
-                {getCommandIcon(cmd)}
-                <span className="ml-2 mr-2">{cmd}</span>
-                <span className="text-xs text-muted-foreground">- {commandDescriptions[cmd]}</span>
-              </div>
-            ))}
+                    <div className="w-4" />
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </div>
-
-        <div className="mb-3">
-          <div className="text-xs font-medium text-muted-foreground mb-1">Social</div>
-          <div className="grid grid-cols-1 gap-1">
-            {socialCommands.map((cmd) => (
-              <div key={cmd} className="flex items-center">
-                {getCommandIcon(cmd)}
-                <span className="ml-2 mr-2">{cmd}</span>
-                <span className="text-xs text-muted-foreground">- {commandDescriptions[cmd]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <div className="text-xs font-medium text-muted-foreground mb-1">System</div>
-          <div className="grid grid-cols-1 gap-1">
-            {systemCommands.map((cmd) => (
-              <div key={cmd} className="flex items-center">
-                {getCommandIcon(cmd)}
-                <span className="ml-2 mr-2">{cmd}</span>
-                <span className="text-xs text-muted-foreground">- {commandDescriptions[cmd]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     )
   }
 
-  // Get suggestions to display
-  const suggestions = getSuggestions()
   const accentColor = theme === "dark" ? "#A374FF" : "hsl(var(--name))"
 
   return (
@@ -487,7 +469,7 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
             <div className="flex flex-col h-full rounded-lg">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-4 border-b">
-                <div className="font-medium text-foreground">Command Terminal</div>
+                <div className="font-medium text-foreground">Menu</div>
                 <button
                   onClick={() => onOpenChange(false)}
                   className="p-1 hover:bg-accent rounded-md transition-colors"
@@ -512,41 +494,14 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
                 </div>
               </div>
 
-              {/* Instruction text or suggestions */}
-              <div className="px-4 py-3 border-b">
-                {inputValue === "" ? (
-                  <div className="text-sm text-muted-foreground">Start typing and see where it leads you... Or just type help</div>
-                ) : suggestions.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {suggestions.map((cmd, index) => (
-                      <span key={index} className="text-sm bg-accent/50 px-2 py-1 rounded text-foreground">
-                        {cmd}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">No matching commands found</div>
-                )}
+              {/* Menu area (filtered live while typing) */}
+              <div
+                className="flex-1 overflow-y-auto"
+                ref={menuScrollRef}
+                onMouseMove={onMenuMouseMove}
+              >
+                <div className="p-0">{renderMenuContent()}</div>
               </div>
-
-              {/* Command history */}
-              {commandHistory.length > 0 && (
-                <div ref={historyRef} className="flex-1 overflow-y-auto p-4 text-sm">
-                  {commandHistory.map((item, index) => (
-                    <div key={index} className="mb-2">
-                      {item.type === "command" ? (
-                        <div className="flex items-center text-muted-foreground">
-                          <span className="mr-2 font-mono">{">"}</span>
-                          <span style={{ color: accentColor }}>_</span>
-                          <span className="text-foreground">{item.content}</span>
-                        </div>
-                      ) : (
-                        <div className="pl-5 text-foreground">{item.content}</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </motion.div>
         </motion.div>
