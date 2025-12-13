@@ -1,8 +1,6 @@
-import { title } from "process"
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
-const config = {
-  
+const config: Config = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -11,7 +9,6 @@ const config = {
     "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -22,53 +19,73 @@ const config = {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        /* Core tokens that map directly to your CSS vars */
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
         background: "var(--background)",
         foreground: "var(--foreground)",
+
+        /* optional/dock/name/title tokens (left as vars so you can add them) */
         dock: "var(--dock)",
         name: "var(--name)",
         title: "var(--title)",
         cborder: "var(--cborder)",
+
+        /* semantic objects with foreground helpers */
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
         },
         muted: {
           DEFAULT: "var(--muted)",
           foreground: "var(--muted-foreground)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
         popover: {
           DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)", 
+          foreground: "var(--popover-foreground)",
         },
         card: {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
-        sidebar: {
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-        },
+
+        /* charts & sidebar */
+        chart1: "var(--chart-1)",
+        chart2: "var(--chart-2)",
+        chart3: "var(--chart-3)",
+        chart4: "var(--chart-4)",
+        chart5: "var(--chart-5)",
+
+        sidebar: "var(--sidebar)",
+        "sidebar-foreground": "var(--sidebar-foreground)",
+        "sidebar-primary": "var(--sidebar-primary)",
+        "sidebar-primary-foreground": "var(--sidebar-primary-foreground)",
+        "sidebar-accent": "var(--sidebar-accent)",
+        "sidebar-accent-foreground": "var(--sidebar-accent-foreground)",
+        "sidebar-border": "var(--sidebar-border)",
+        "sidebar-ring": "var(--sidebar-ring)",
       },
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+
+      /* animations used by Radix-style accordions */
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -83,9 +100,15 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+
+      /* optional: expose your blog font-size var if you use it */
+      fontSize: {
+        blog: "var(--blog-font-size)",
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config
 
-export default config
+  plugins: [require("tailwindcss-animate")],
+};
+
+export default config;

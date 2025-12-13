@@ -180,7 +180,7 @@ export const Sandbox = React.memo(function Sandbox() {
         description: "Please provide both your name and a message.",
         variant: "destructive",
       })
-      return                                                                                                                                                                                                                                                
+      return
     }
 
     setIsLoading(true)
@@ -195,7 +195,7 @@ export const Sandbox = React.memo(function Sandbox() {
       const y_position = Math.random() * (containerHeight - margin * 2) + margin
       const color = getRandomColor()
 
-      const { data, error } = await supabase                                                                                                                                     
+      const { data, error } = await supabase
         .from("messages")
         .insert([{ name, message, x_position, y_position, color }])
         .select()
@@ -270,9 +270,9 @@ export const Sandbox = React.memo(function Sandbox() {
           // Reset particle if it goes off screen
           ...(particle.y > containerHeight
             ? {
-                y: 0,
-                x: Math.random() * containerWidth,
-              }
+              y: 0,
+              x: Math.random() * containerWidth,
+            }
             : {}),
         })),
       )
@@ -321,10 +321,10 @@ export const Sandbox = React.memo(function Sandbox() {
         // Use normalized positions for connection calculations
         const pos1 = normalizePosition(messages[i].x_position, messages[i].y_position)
         const pos2 = normalizePosition(messages[j].x_position, messages[j].y_position)
-        
+
         const distance = Math.sqrt(
           Math.pow(pos1.x - pos2.x, 2) +
-            Math.pow(pos1.y - pos2.y, 2),
+          Math.pow(pos1.y - pos2.y, 2),
         )
 
         if (distance < connectionDistance) {
@@ -333,7 +333,7 @@ export const Sandbox = React.memo(function Sandbox() {
           const centerY1 = pos1.y + starCenterOffset
           const centerX2 = pos2.x + starCenterOffset
           const centerY2 = pos2.y + starCenterOffset
-          
+
           ctx.moveTo(centerX1, centerY1)
           ctx.lineTo(centerX2, centerY2)
         }
@@ -441,8 +441,8 @@ export const Sandbox = React.memo(function Sandbox() {
                 style={{
                   width: `${starSize.outer}px`,
                   height: `${starSize.outer}px`,
-                  backgroundColor: `${ theme === "dark" ? msg.color : "#A374FF" }`,
-                  boxShadow: `0 0 ${isMobile ? 8 : 12}px ${ theme === "dark" ? msg.color : "#A374FF" }`,
+                  backgroundColor: `${theme === "dark" ? msg.color : "#A374FF"}`,
+                  boxShadow: `0 0 ${isMobile ? 8 : 12}px ${theme === "dark" ? msg.color : "#A374FF"}`,
                 }}
               />
               <div
@@ -469,16 +469,13 @@ export const Sandbox = React.memo(function Sandbox() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className={`absolute z-[9999] rounded-lg p-3 shadow-lg border ${
-              isMobile ? "max-w-[280px] pointer-events-auto" : "max-w-xs pointer-events-none"
-            }`}
+            className={`absolute z-[9999] rounded-lg p-3 shadow-lg border ${isMobile ? "max-w-[280px] pointer-events-auto" : "max-w-xs pointer-events-none"
+              }`}
             style={{
               left: `${position.x}px`,
               top: `${position.y}px`,
               backgroundColor: backgroundColor,
               backdropFilter: "blur(8px)",
-              borderColor: borderColor,
-              boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
             }}
             onClick={() => isMobile && setHoveredMessage(null)} // Allow closing on mobile
           >
@@ -525,9 +522,7 @@ export const Sandbox = React.memo(function Sandbox() {
         size={isMobile ? "sm" : "icon"}
         className={`absolute ${isMobile ? "bottom-4 right-4 h-12 w-12" : "bottom-4 right-4"} rounded-full z-30`}
         style={{
-          borderColor: borderColor,
           backgroundColor: backgroundColor,
-          boxShadow: `0 0 10px ${borderColor}`,
         }}
         onClick={() => setShowForm(true)}
       >
@@ -540,9 +535,7 @@ export const Sandbox = React.memo(function Sandbox() {
         size={isMobile ? "sm" : "icon"}
         className={`absolute ${isMobile ? "bottom-4 left-4 h-12 w-12" : "bottom-4 left-4"} rounded-full z-30`}
         style={{
-          borderColor: borderColor,
           backgroundColor: backgroundColor,
-          boxShadow: `0 0 10px ${borderColor}`,
         }}
         onClick={() => setShowInfo(!showInfo)}
       >
@@ -551,18 +544,13 @@ export const Sandbox = React.memo(function Sandbox() {
 
       {/* Message count */}
       <div
-        className={`absolute top-4 left-4 rounded-full px-3 py-1 flex items-center gap-2 z-30 ${
-          isMobile ? "text-xs" : "text-sm"
-        }`}
+        className={`absolute top-4 left-4 rounded-full px-3 py-1 flex items-center gap-2 z-30 ${isMobile ? "text-xs" : "text-sm"
+          }`}
         style={{
-          backgroundColor: backgroundColor,
           backdropFilter: "blur(4px)",
-          borderColor: borderColor,
-          border: `1px solid ${borderColor}`,
-          color: textColor,
         }}
       >
-        <MessageSquare size={isMobile ? 12 : 14} style={{ color: secondaryColor }} />
+        <MessageSquare size={isMobile ? 12 : 14} />
         <span>{messages.length} messages</span>
       </div>
 
@@ -573,17 +561,15 @@ export const Sandbox = React.memo(function Sandbox() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className={`absolute ${
-              isMobile ? "bottom-20 left-4 right-4" : "bottom-16 left-4 max-w-xs"
-            } z-30 p-4 rounded-lg border`}
+            className={`absolute ${isMobile ? "bottom-20 left-4 right-4" : "bottom-16 left-4 max-w-xs"
+              } z-30 p-4 rounded-lg border`}
             style={{
               backgroundColor: backgroundColor,
               backdropFilter: "blur(8px)",
-              borderColor: borderColor,
             }}
           >
             <div className="flex justify-between items-center mb-2">
-              <h4 className={`font-bold ${isMobile ? "text-base" : ""}`} style={{ color: secondaryColor }}>
+              <h4 className={`font-bold ${isMobile ? "text-base" : ""} `} style={{ color: textColor }}>
                 About This Space
               </h4>
               <Button
@@ -625,7 +611,6 @@ export const Sandbox = React.memo(function Sandbox() {
               style={{
                 backgroundColor: backgroundColor,
                 backdropFilter: "blur(12px)",
-                borderColor: borderColor,
               }}
             >
               <div className="flex justify-between items-center mb-4">

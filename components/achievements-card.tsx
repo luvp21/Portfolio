@@ -59,7 +59,7 @@ export function AchievementsCard() {
         {achievements.map((achievement) => (
           <motion.div
             key={achievement.id}
-            className="p-3 border rounded-lg flex items-center gap-3"
+            className="px-2 flex items-center gap-3"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -68,7 +68,7 @@ export function AchievementsCard() {
               {getIcon(achievement.icon)}
             </div>
             <div className="flex-1">
-              <div className="font-medium flex items-center gap-2 text-name">
+              <div className="text-lg flex items-center gap-2 font-bold">
                 {achievement.title}
                 {achievement.date && (
                   <Badge variant="outline" className="text-xs">

@@ -32,10 +32,10 @@ export function TechStack() {
         return (
           <div
             key={tech.name}
-            className="relative flex flex-col items-center justify-center gap-2 rounded-xl border border-border px-4 py-6 transition-all "
+            className="relative flex flex-col items-center gap-2 px-2 py-4 transition-all "
           >
             <Icon
-              className="text-[28px] z-10"
+              className="text-[36px] z-10"
               style={{
                 color: tech.name === "Next.js" ? "var(--foreground)" : tech.color,
               }}
