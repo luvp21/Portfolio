@@ -96,12 +96,20 @@ export function DesktopCanvas({
                             {panelType === "projects" && (
                                 <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar">
                                     <ProjectCard
+                                        title="DinoSprint – Pixel Endless Runner"
+                                        description="Chrome Dino–style endless runner with leaderboard, unlockable skins, and session stats."
+                                        tags={["Vite", "TypeScript", "React", "Tailwind", "Supabase", "Vercel"]}
+                                        image="/Dino.png"
+                                        githubUrl="https://github.com/luvp21/Dino"
+                                        liveUrl="https://dinosprint.vercel.app/"
+                                    />
+                                    <ProjectCard
                                         title="Interactive Portfolio"
                                         description="A canvas-based portfolio with draggable panels and Command Terminal"
                                         tags={["Next.js", "TypeScript", "Tailwind", "React", "Vercel"]}
                                         image="/portfolio.png"
                                         githubUrl="https://github.com/luvp21/Portfolio"
-                                        liveUrl="https://portfolio-luvp21s-projects.vercel.app/"
+                                        liveUrl="https://luv-patel.vercel.app/"
                                     />
                                     <ProjectCard
                                         title="EV Rental Website"

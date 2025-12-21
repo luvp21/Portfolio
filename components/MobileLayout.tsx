@@ -60,6 +60,14 @@ export function MobileLayout({ panels, theme }: MobileLayoutProps) {
                     <Briefcase className="h-4 w-4" />,
                     <div className="space-y-4 max-h-[350px] overflow-y-auto p-2 hide-scrollbar">
                         <ProjectCard
+                            title="DinoSprint – Pixel Endless Runner"
+                            description="Chrome Dino–style endless runner with leaderboard, unlockable skins, and session stats."
+                            tags={["Vite", "TypeScript", "React", "Tailwind", "Supabase", "Vercel"]}
+                            image="/Dino.png"
+                            githubUrl="https://github.com/luvp21/Dino"
+                            liveUrl="https://dinosprint.vercel.app/"
+                        />
+                        <ProjectCard
                             title="Interactive Portfolio"
                             description="A canvas-based portfolio with draggable panels and Command Terminal"
                             tags={["Next.js", "TypeScript", "Tailwind", "React", "Vercel"]}
