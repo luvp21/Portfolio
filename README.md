@@ -178,13 +178,16 @@ pnpm dev
 
 ## Screenshots / Demo
 
-<!-- Add screenshots here -->
-- Desktop view with draggable panels
-- Mobile responsive layout
-- Command bar interface
-- Dark and light themes
-
 Live demo: [https://luv-patel.vercel.app](https://luv-patel.vercel.app)
+
+<img width="1920" height="1079" alt="image" src="https://github.com/user-attachments/assets/09854b84-a9bb-4d84-910d-b60820366005" />
+<img width="1920" height="1079" alt="image" src="https://github.com/user-attachments/assets/4fffbc7c-5589-4971-9e77-1df9c34bad37" />
+<img width="1920" height="1079" alt="image" src="https://github.com/user-attachments/assets/a2c17bb2-6dec-46fb-b660-345e32950587" />
+<img width="1920" height="1079" alt="image" src="https://github.com/user-attachments/assets/4078c060-98dc-481f-954f-cb0536ce1332" />
+<img width="1920" height="1079" alt="image" src="https://github.com/user-attachments/assets/a84cdb0e-2fce-49f0-bb1c-f64daa2639a6" />
+
+
+
 
 ---
 
