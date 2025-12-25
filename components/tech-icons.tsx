@@ -11,6 +11,8 @@ import {
     SiNodedotjs,
     SiVercel,
     SiMysql,
+    SiSupabase,   // ✅ added
+    SiVite,       // ✅ added
 } from "react-icons/si"
 
 export const techIcons: Record<string, JSX.Element> = {
@@ -20,11 +22,12 @@ export const techIcons: Record<string, JSX.Element> = {
     TypeScript: <SiTypescript className="w-[22px] h-[22px] text-[#3178C6]" />,
     Tailwind: <SiTailwindcss className="w-[22px] h-[22px] text-[#38BDF8]" />,
     Vercel: <SiVercel className="w-[22px] h-[22px] text-black dark:text-white" />,
+    Vite: <SiVite className="w-[22px] h-[22px] text-[#646CFF]" />,         // 💜 official purple
 
     // Databases
     MongoDB: <SiMongodb className="w-[22px] h-[22px] text-[#4DB33D]" />,
     PostgreSQL: <SiPostgresql className="w-[22px] h-[22px] text-[#336791]" />,
-    SQL: <SiMysql className="w-[22px] h-[22px] text-[#005C84]" />, // using MySQL icon for SQL
+    SQL: <SiMysql className="w-[22px] h-[22px] text-[#005C84]" />,
 
     // Backend / BE tools
     "Node.js": <SiNodedotjs className="w-[22px] h-[22px] text-[#539E43]" />,
@@ -32,5 +35,6 @@ export const techIcons: Record<string, JSX.Element> = {
 
     // Extras
     Prisma: <SiPrisma className="w-[22px] h-[22px] text-black dark:text-white" />,
+    Supabase: <SiSupabase className="w-[22px] h-[22px] text-[#3ECF8E]" />, // 💚 official green
     MDX: <SiMdx className="w-[22px] h-[22px] text-black dark:text-white" />,
 }
