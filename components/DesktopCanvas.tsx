@@ -10,6 +10,7 @@ import { TechStack } from "@/components/tech-stack"
 import { AchievementsCard } from "@/components/achievements-card"
 import { ExperienceTimeline } from "@/components/experience-timeline"
 import { Sandbox } from "@/components/Sandbox"
+import { PROJECTS } from "@/lib/data"
 
 interface DesktopCanvasProps {
     panels: Record<PanelType, PanelState>
@@ -94,37 +95,10 @@ export function DesktopCanvas({
                             {panelType === "about" && <ProfileCard />}
 
                             {panelType === "projects" && (
-                                <div className="grid grid-cols-1 gap-4 p-4 overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar">
-                                    <ProjectCard
-                                        title="DinoSprint – Pixel Endless Runner"
-                                        description="Chrome Dino–style endless runner with leaderboard, unlockable skins, and session stats."
-                                        tags={["Vite", "TypeScript", "React", "Tailwind", "Supabase", "Vercel"]}
-                                        image="/Dino.png"
-                                        githubUrl="https://github.com/luvp21/Dino"
-                                        liveUrl="https://dinosprint.vercel.app/"
-                                    />
-                                    <ProjectCard
-                                        title="Interactive Portfolio"
-                                        description="A canvas-based portfolio with draggable panels and Command Terminal"
-                                        tags={["Next.js", "TypeScript", "Tailwind", "React", "Vercel"]}
-                                        image="/portfolio.png"
-                                        githubUrl="https://github.com/luvp21/Portfolio"
-                                        liveUrl="https://luv-patel.vercel.app/"
-                                    />
-                                    <ProjectCard
-                                        title="EV Rental Website"
-                                        description="EV rental system with secure KYC, real-time tracking, and automated payments."
-                                        tags={["React", "Tailwind", "MongoDB", "Node.js", "Vercel"]}
-                                        image="/erental.png"
-                                        githubUrl="https://github.com/mihir1816/Deep-Drillers-2.0"
-                                    />
-                                    <ProjectCard
-                                        title="Excalidraw Clone"
-                                        description="A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style."
-                                        tags={["TypeScript", "Next.js", "Tailwind", "Prisma", "PostgreSQL", "Socket.io"]}
-                                        image="/excalidraw.png"
-                                        githubUrl="https://github.com/luvp21/Draw-App"
-                                    />
+                                <div className="grid grid-cols-2 gap-4 p-4 overflow-y-auto max-h-[calc(100%-1rem)] hide-scrollbar">
+                                    {PROJECTS.map((project) => (
+                                        <ProjectCard key={project.title} {...project} />
+                                    ))}
                                 </div>
                             )}
 

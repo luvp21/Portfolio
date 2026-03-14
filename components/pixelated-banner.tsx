@@ -1,218 +1,173 @@
 "use client";
-import dynamic from "next/dynamic";
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
-
-
+import { CodingStatsPanel } from "@/components/coding-stats-panel";
+import { TypingTester } from "@/components/typing-tester";
+import { WeatherClock } from "@/components/weather-clock";
+import { DiscordPresence } from "@/components/discord-presence";
+import { ArrowUpRight } from "lucide-react";
+import { PERSONAL, BANNER_SOCIALS } from "@/lib/data";
 
 interface PixelatedBannerProps {
-  isHidden?: boolean;
-  headerHeight?: string;
-  clockIntervalMs?: number;
+  isBlurred?: boolean;
   className?: string;
-  minFontSizePx?: number;
-  maxFontSizePx?: number;
-  /** container width bounds (CSS length or number px) */
-  minContainerWidth?: number; // px
-  maxContainerWidth?: number; // px
 }
 
+
+
 export function PixelatedBanner({
-  isHidden = false,
-  headerHeight = "4rem",
-  clockIntervalMs = 1000,
+  isBlurred = false,
   className,
-  // font-size clamp
-  minFontSizePx = 32,
-  maxFontSizePx = 72,
-  // container width bounds
-  minContainerWidth = 480, // don't go narrower than this (px)
-  maxContainerWidth = 1200, // don't go wider than this (px)
 }: PixelatedBannerProps) {
-  const gap = "0.5rem";
-  const belowHeaderStyle = { top: `calc(${headerHeight} + ${gap})` } as React.CSSProperties;
 
-  // Live IST clock
-  const [istTime, setIstTime] = useState<string>(() => formatIST(new Date()));
-  useEffect(() => {
-    const id = setInterval(() => setIstTime(formatIST(new Date())), clockIntervalMs);
-    return () => clearInterval(id);
-  }, [clockIntervalMs]);
 
-  // fit-to-one-line logic
-  const titleRef = useRef<HTMLHeadingElement | null>(null);
-  const titleContainerRef = useRef<HTMLDivElement | null>(null);
-  const [fontPx, setFontPx] = useState<number>(maxFontSizePx);
-
-  // compute bounded container width (in px) to measure against
-  const getBoundedContainerWidth = () => {
-    const container = titleContainerRef.current;
-    if (!container) {
-      // fallback to viewport width minus safe padding
-      return Math.max(minContainerWidth, Math.min(maxContainerWidth, window.innerWidth - 160));
-    }
-
-    // preferred width is the computed CSS width of the container element
-    const style = window.getComputedStyle(container);
-    // parse px width if available, otherwise fallback to clientWidth
-    const parsed = parseFloat(style.width);
-    const rawWidth = Number.isFinite(parsed) && parsed > 0 ? parsed : container.clientWidth;
-
-    // keep it inside [minContainerWidth, maxContainerWidth] and viewport (90vw)
-    const viewportMax = Math.round(window.innerWidth * 0.9);
-    const bounded = Math.max(minContainerWidth, Math.min(maxContainerWidth, Math.min(rawWidth, viewportMax)));
-    return bounded;
+  const STRIPE = {
+    backgroundImage:
+      "repeating-linear-gradient(135deg, transparent, transparent 6px, currentColor 8px, currentColor 6px)",
+    opacity: 0.2,
   };
 
-  // try to fit in one line by reducing font size in fractional steps (0.5px)
-  const fitToOneLine = () => {
-    const el = titleRef.current;
-    const container = titleContainerRef.current;
-    if (!el || !container) return;
 
-    let current = maxFontSizePx;
-    el.style.fontSize = `${current}px`;
-    el.style.whiteSpace = "nowrap"; // measure single-line width
-
-    // use the bounded container width as measurement target
-    const containerWidth = getBoundedContainerWidth() - 24; // small tolerance/padding
-
-    // quick accept if already fits
-    if (el.scrollWidth <= containerWidth) {
-      setFontPx(current);
-      el.style.whiteSpace = "nowrap";
-      return;
-    }
-
-    // decrease in 0.5px steps until it fits or we reach min
-    while (current > minFontSizePx + 0.001) {
-      current = Math.round((current - 0.5) * 100) / 100;
-      el.style.fontSize = `${current}px`;
-      if (el.scrollWidth <= containerWidth) {
-        setFontPx(current);
-        el.style.whiteSpace = "nowrap";
-        return;
-      }
-    }
-
-    // Couldn't fit at min — allow wrapping but keep at min size for readability
-    el.style.whiteSpace = "normal";
-    setFontPx(minFontSizePx);
-  };
-
-  // run on mount + resize + when container bounds change
-  useEffect(() => {
-    fitToOneLine();
-
-    let rafId: number | null = null;
-    const onResize = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => fitToOneLine());
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("resize", onResize);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [minFontSizePx, maxFontSizePx, minContainerWidth, maxContainerWidth]);
-
-  // inline style for title container that enforces min/max width (responsive)
-  const titleContainerStyle: React.CSSProperties = {
-    width: "min(90vw, " + `${maxContainerWidth}px` + ")",
-    minWidth: `${minContainerWidth}px`,
-    marginInline: "auto",
-  };
 
   return (
     <div
       className={cn(
-        "fixed inset-0 pointer-events-none z-10 overflow-hidden transition-opacity duration-300",
-        isHidden && "opacity-0",
+        "absolute inset-0 pointer-events-none z-0 overflow-hidden",
         className
       )}
     >
-      {/* Avatar (kept near title area) */}
-      <div
-        className="absolute -translate-y-0"
-        style={{
-          ...belowHeaderStyle,
-          left: "4%",
-          top: "14%",
-          transform: "translateY(-6px) rotate(-12deg)",
-        } as React.CSSProperties}
-      >
-        <img
-          src="/pp.png"
-          alt="Profile"
-          className="w-32 h-32 md:w-36 md:h-36 bg-blue-300 rounded-full shadow-lg object-cover"
-        />
-      </div>
 
-      {/* Clock */}
-      <div className="absolute right-8" style={belowHeaderStyle}>
-        <div aria-live="polite" className="text-sm md:text-base text-foreground/60 font-mono select-none">
-          {istTime} IST
-        </div>
-      </div>
 
-      {/* Title container (bounded width so the text never overflows viewport) */}
-      <div className="absolute inset-0 flex items-center justify-center px-4">
-        <div ref={titleContainerRef} className="relative text-center" style={titleContainerStyle}>
-          <h1
-            ref={titleRef}
-            style={{ fontSize: `${fontPx}px` }}
-            className={cn("pixelated-text text-foreground/30 dark:text-foreground/20 leading-tight select-none", "tracking-[0.03em]")}
-          >
-            Hi, I'm Luv — A Full Stack web developer.
-          </h1>
+      {/* ── 2-column flex layout ── */}
+      <div className="absolute inset-0 flex">
 
-          {/* Right bubble: move it a bit inward to avoid pushing off-screen */}
-          {/* <div className="absolute -top-6 right-[-80px] md:right-[-120px] lg:right-[-60px]">
-            <div className="relative rotate-[12deg]">
-              <div className="absolute inset-0 border-[3px] border-black/80 dark:border-white/70 rounded-[50%] scale-[1.25] pointer-events-none"></div>
-              <p className="px-2 py-2 text-xs md:text-sm pixelated-text-small text-foreground/70 dark:text-foreground/40 select-none whitespace-nowrap">
-                press / for ?
+        {/* ── LEFT (main): README + WeatherClock + bottom stats ── */}
+        <div className="flex-1 min-w-0 flex flex-col pt-[2%] pl-[2%] pr-[2%]">
+          {/* Top: README header + WeatherClock side by side */}
+          <div className="flex items-start justify-between gap-6">
+            <div className="border-l-[5px] border-foreground pl-5 pt-1 shrink-0 max-w-[60%] pointer-events-auto select-text">
+              <p className="text-foreground font-mono mb-4 tracking-wide text-sm xl:text-base">
+                {PERSONAL.readmePath}
               </p>
+              <p
+                className="gaegu-text text-foreground leading-tight"
+                style={{ fontSize: "clamp(2.2rem, 5.5vw, 4.5rem)" }}
+              >
+                {PERSONAL.headline[0]}
+              </p>
+              <p
+                className="gaegu-text text-foreground leading-tight -mt-2"
+                style={{ fontSize: "clamp(1.8rem, 4.5vw, 4rem)" }}
+              >
+                {PERSONAL.headline[1]}
+              </p>
+              <p
+                className="gaegu-text text-muted-foreground leading-relaxed"
+                style={{ fontSize: "clamp(0.85rem, 1.4vw, 1.25rem)" }}
+              >
+                {PERSONAL.bannerBio}
+              </p>
+
             </div>
-          </div> */}
+            <div className="shrink-0">
+              <WeatherClock />
+            </div>
+          </div>
+
+          {/* ── Horizontal stripe — left section only ── */}
+          <div
+            className="hidden lg:block pointer-events-none border-y border-foreground -ml-8 -mr-8 mt-[clamp(20px,5vh,56px)]"
+            style={{
+              height: "25px",
+              ...STRIPE,
+            }}
+          />
+
+          {/* Bottom: stats + typing row */}
+          <div className="hidden lg:flex flex-col">
+            <div className="-mx-[3%] border-t border-b border-foreground/20">
+              <CodingStatsPanel />
+            </div>
+            {/* Typing tester + More Detail */}
+            <div className="flex items-stretch ">
+              <div className="w-[40%] pointer-events-auto pt-[1%] pr-2 border-r border-foreground/20">
+                <TypingTester />
+              </div>
+              <div
+                className="flex-1 -mr-7 flex items-center justify-center select-none border-l border-foreground/20 min-h-full h-full overflow-hidden"
+                style={{
+                  backgroundColor: "hsl(var(--card))",
+                  backgroundImage: "radial-gradient(rgba(100,100,100,0.4) 1px, transparent 1px)",
+                  backgroundSize: "14px 14px",
+                }}
+              >
+                <img
+                  src="/more_detail.svg"
+                  alt="More Detail"
+                  className="w-[240px] max-w-[90%] h-auto opacity-60 -mr-16 -mb-6 dark:invert dark:opacity-50"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Vertical stripe ── */}
+        <div
+          className="w-5 shrink-0 self-stretch border-x border-foreground"
+          style={{
+            width: "25px",
+            ...STRIPE,
+          }}
+        />
+
+        {/* ── RIGHT: Discord + Socials ── */}
+        <div className="w-[clamp(220px,24%,340px)] shrink-0 flex flex-col py-[2%] pointer-events-auto gap-3 border-t border-b border-r border-foreground/30">
+          <DiscordPresence />
+          <div className="flex flex-col">
+            {BANNER_SOCIALS.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2 border-y border-border/50 bg-card/30 hover:bg-card/60 transition-colors group w-full"
+              >
+                <div className={cn("w-8 h-8 rounded flex items-center justify-center shrink-0", s.bgClass)}>
+                  {s.icon}
+                </div>
+                <span className="text-sm font-medium text-foreground flex-1">{s.label}</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </a>
+            ))}
+          </div>
+          <div
+            className="w-full flex-1 min-h-0 flex items-center justify-center -mt-3 -mb-8 overflow-hidden"
+            style={{
+              backgroundColor: "hsl(var(--card))",
+              backgroundImage: "radial-gradient(rgba(100,100,100,0.4) 1px, transparent 1px)",
+              backgroundSize: "14px 14px",
+            }}
+          >
+            <img
+              src="/follow_me.svg"
+              alt="Follow me"
+              className="w-[220px] max-w-[90%] h-36 -mt-1 opacity-60 dark:invert dark:opacity-50"
+              loading="lazy"
+            />
+          </div>
+
         </div>
       </div>
 
-      {/* Bottom-right visitor text — note pointer-events-auto so it can be interactive even though parent has pointer-events-none */}
+      {/* ── Blur/dim overlay (avoids filter on parent which blacks out backdrop-filter children) ── */}
       <div
-        className="pointer-events-auto z-[9999] hidden sm:block"
-        // inline style uses safe-area inset + fallback spacing so it won't overlap
-        style={{
-          right: "1.5rem",
-          bottom: "calc(env(safe-area-inset-bottom, 0px) + 4rem)", // push above footer
-          position: "absolute",
-        }}
-      >
-        {/* <div className="flex items-center gap-2 text-sm md:text-base font-mono text-foreground/70 dark:text-foreground/50 select-none">
-          <LiveVisitorBadge incrementOnMount={true} />
+        className={cn(
+          "absolute inset-0 pointer-events-none backdrop-blur-sm bg-background/50 transition-opacity duration-700 ease-in-out",
+          isBlurred ? "opacity-100" : "opacity-0"
+        )}
+      />
 
-        </div> */}
-      </div>
     </div>
   );
-}
-
-/** Helper to format a Date to "H:MM" in Asia/Kolkata timezone */
-function formatIST(date: Date) {
-  try {
-    const fmt = new Intl.DateTimeFormat("en-GB", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Kolkata",
-    });
-    return fmt.format(date);
-  } catch (e) {
-    const utc = date.getTime() + date.getTimezoneOffset() * 60000;
-    const ist = new Date(utc + 5.5 * 60 * 60 * 1000);
-    const h = ist.getHours();
-    const m = ist.getMinutes().toString().padStart(2, "0");
-    return `${h}:${m}`;
-  }
 }

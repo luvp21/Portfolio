@@ -1,94 +1,13 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronUp, Building2, Briefcase, GraduationCap } from "lucide-react"
-
-interface ExperienceItem {
-  id: number
-  title: string
-  company: string
-  period: string
-  description: string
-  skills: string[]
-  icon: "company" | "education" | "freelance" | "organization"
-}
+import { EXPERIENCE } from "@/lib/data"
 
 export function ExperienceTimeline() {
-  // const [expandedItems, setExpandedItems] = useState<number[]>([1])
-
-  const experiences: ExperienceItem[] = [
-    {
-      id: 1,
-      title: "General Secretary",
-      company: "Computer Society of India - Nirma University",
-      period: " Aug 2025 – Present",
-      description:
-        "Managing club operations, leading teams, and overseeing events and initiatives at CSI Nirma.",
-      skills: [
-        "Leadership",
-        "Team Management",
-        "Communication"
-      ],
-      icon: "organization",
-    },
-    {
-      id: 2,
-      title: "Core Committee Member",
-      company: "Computer Society of India - Nirma University",
-      period: " Oct 2024 – Aug 2025",
-      description:
-        "Developed CSI Nirma’s official website.",
-      skills: [
-        "Node.js",
-        "MongoDB",
-        "Express",
-        "JavaScript",
-        "React",
-        "Web Development",
-      ],
-      icon: "organization",
-    },
-    {
-      id: 3,
-      title: "B.Tech in Computer Science and Engineering",
-      company: "Nirma University",
-      period: "2023 – 2027",
-      description:
-        "Pursuing a B.Tech in Computer Science and Engineering at Nirma University.",
-      skills: [
-        "Data Structures and Algorithms",
-        "OOP",
-        "Operating System",
-        "DBMS",
-        "Full Stack Web Development"
-      ],
-      icon: "education",
-    },
-  ]
-
-  // const toggleExpand = (id: number) => {
-  //   setExpandedItems((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
-  // }
-
-  const getIcon = (iconType: string) => {
-    switch (iconType) {
-      case "company":
-        return <Building2 className="h-5 w-5" />
-      case "education":
-        return <GraduationCap className="h-5 w-5" />
-      case "freelance":
-        return <Briefcase className="h-5 w-5" />
-      default:
-        return <Building2 className="h-5 w-5" />
-    }
-  }
-
   return (
     <div className="space-y-4 p-2 hide-scrollbar">
-      {experiences.map((exp) => (
+      {EXPERIENCE.map((exp) => (
         <motion.div
           key={exp.id}
           initial={{ opacity: 0, y: 20 }}

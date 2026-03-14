@@ -3,37 +3,9 @@
 import { motion } from "framer-motion"
 import { Award, Star, Trophy, Medal, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-
-interface Achievement {
-  id: string
-  title: string
-  description: string
-  icon: "award" | "star" | "trophy" | "medal" | "sparkles"
-  date?: string
-}
+import { ACHIEVEMENTS } from "@/lib/data"
 
 export function AchievementsCard() {
-  const achievements: Achievement[] = [
-    {
-      id: "1",
-      title: "Hackathon Winner",
-      description: "1st place at Breach FinTech hackathon (at PDEU) with an AI-powered EV rental system.",
-      icon: "trophy",
-      date: "May 2025",
-    },
-    {
-      id: "2",
-      title: "LeetCode",
-      description: "Solved 100+ problems on LeetCode, building strong DSA fundamentals.",
-      icon: "award",
-    },
-    {
-      id: "3",
-      title: "Codeforces",
-      description: "Reached Pupil rank and solved 250+ problems on Codeforces.",
-      icon: "star",
-    }
-  ]
 
   const getIcon = (iconType: string) => {
     switch (iconType) {
@@ -56,7 +28,7 @@ export function AchievementsCard() {
     <div className="p-2 h-full overflow-y-auto hide-scrollbar ">
 
       <div className="space-y-3">
-        {achievements.map((achievement) => (
+        {ACHIEVEMENTS.map((achievement) => (
           <motion.div
             key={achievement.id}
             className="px-2 flex items-center gap-3"

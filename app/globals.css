@@ -24,9 +24,10 @@
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
-    --grid-line: #d4d4d44f;
+    /* --grid-line: #ababab4f; */
     /* subtle light-gray lines */
     --grid-size: 50px;
+    /* --zone-pattern: rgb(221, 217, 217); */
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
@@ -61,9 +62,10 @@
     --border: #ffffff1a;
     --input: #ffffff26;
     --ring: #737373;
-    --grid-line: #2626264f;
+    --grid-line: #3636364f;
     /* your original dark grid lines */
     --grid-size: 50px;
+    --zone-pattern: rgba(0, 0, 0, 1);
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
@@ -128,6 +130,36 @@
     background-size: 30px 30px;
   }
 
+  /* Wallpaper zone overlays — subtle directional pattern regions */
+  /* background-attachment:fixed anchors tile origin to viewport so zones
+     share the same grid origin as .grid-snap-background on any screen size */
+  .zone-diagonal {
+    background-image: repeating-linear-gradient(45deg,
+        var(--zone-pattern) 0px,
+        var(--zone-pattern) 1px,
+        transparent 1px,
+        transparent 35px);
+    background-attachment: fixed;
+  }
+
+  .zone-vertical {
+    background-image: repeating-linear-gradient(90deg,
+        var(--zone-pattern) 0px,
+        var(--zone-pattern) 1px,
+        transparent 1px,
+        transparent 25px);
+    background-attachment: fixed;
+  }
+
+  .zone-horizontal {
+    background-image: repeating-linear-gradient(0deg,
+        var(--zone-pattern) 0px,
+        var(--zone-pattern) 1px,
+        transparent 1px,
+        transparent 25px);
+    background-attachment: fixed;
+  }
+
   .hide-scrollbar {
     -ms-overflow-style: none;
     /* IE and Edge */
@@ -164,6 +196,14 @@
     font-family: var(--font-caveat), 'Caveat', cursive;
     font-weight: 600;
     letter-spacing: 0.02em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .gaegu-text {
+    font-family: var(--font-gaegu), 'Gaegu', cursive;
+    font-weight: 400;
+    letter-spacing: 0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
