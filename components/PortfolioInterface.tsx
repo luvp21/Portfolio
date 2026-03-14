@@ -15,6 +15,9 @@ import { MobileLayout } from "@/components/MobileLayout"
 import { DesktopCanvas } from "@/components/DesktopCanvas"
 import type { PanelType, PanelState, PanelDimensions } from "./types"
 
+const DESIGN_CANVAS_WIDTH = 1440
+const DESIGN_CANVAS_HEIGHT = 670
+
 // Compute panel dimensions that scale proportionally with the canvas.
 // Reference canvas: 1440 × 810 (a typical 1080p desktop minus chrome).
 const getDefaultPanelDimensions = (
@@ -120,7 +123,9 @@ export default function PortfolioInterface() {
     const [highestZIndex, setHighestZIndex] = useState(1)
     const { isMobile } = useResponsive()
     const canvasRef = useRef<HTMLDivElement | null>(null)
+    const canvasHostRef = useRef<HTMLDivElement | null>(null)
     const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 })
+    const [canvasScale, setCanvasScale] = useState(1)
 
     // Panel dimensions scale with the actual canvas size
     const panelDimensions = useMemo(() => {
@@ -155,13 +160,35 @@ export default function PortfolioInterface() {
 
     const { setTheme, theme } = useTheme()
 
+    // Scale whole desktop canvas up/down based on available space
+    useEffect(() => {
+        if (isMobile) return
+
+        const updateScale = () => {
+            const host = canvasHostRef.current
+            if (!host) return
+            const rect = host.getBoundingClientRect()
+            const sx = rect.width / DESIGN_CANVAS_WIDTH
+            const sy = rect.height / DESIGN_CANVAS_HEIGHT
+            const scale = Math.max(0.4, Math.min(sx, sy))
+            setCanvasScale(scale)
+        }
+
+        updateScale()
+        window.addEventListener("resize", updateScale)
+        return () => window.removeEventListener("resize", updateScale)
+    }, [isMobile])
+
     // Initializer effect: loads saved desktop positions, but NEVER overwrites mobile initial active panels
     useEffect(() => {
         if (isInitialized) return
 
-        const rect = canvasRef.current?.getBoundingClientRect()
-        const vw = rect ? rect.width : (typeof window !== "undefined" ? window.innerWidth : 1024)
-        const vh = rect ? rect.height : (typeof window !== "undefined" ? window.innerHeight : 768)
+        const vw = isMobile
+            ? (typeof window !== "undefined" ? window.innerWidth : 1024)
+            : DESIGN_CANVAS_WIDTH
+        const vh = isMobile
+            ? (typeof window !== "undefined" ? window.innerHeight : 768)
+            : DESIGN_CANVAS_HEIGHT
         setViewportSize({ width: vw, height: vh })
 
         const dims = getDefaultPanelDimensions(vw, vh)
@@ -192,7 +219,7 @@ export default function PortfolioInterface() {
         }
 
         setIsInitialized(true)
-    }, [isInitialized, resetKey])
+    }, [isInitialized, resetKey, isMobile])
 
     // If user switches to mobile after initialization, force-activate panels and ignore saved
     useEffect(() => {
@@ -214,9 +241,13 @@ export default function PortfolioInterface() {
     // Update viewport size on window resize (and constrain panels)
     useEffect(() => {
         const handleResize = () => {
-            const rect = canvasRef.current?.getBoundingClientRect()
-            const vw = rect ? rect.width : window.innerWidth
-            const vh = rect ? rect.height : window.innerHeight
+            if (!isMobile) {
+                setViewportSize({ width: DESIGN_CANVAS_WIDTH, height: DESIGN_CANVAS_HEIGHT })
+                return
+            }
+
+            const vw = window.innerWidth
+            const vh = window.innerHeight
             setViewportSize({ width: vw, height: vh })
 
             if (isInitialized && Object.keys(panels).length > 0) {
@@ -227,7 +258,7 @@ export default function PortfolioInterface() {
 
         window.addEventListener("resize", handleResize)
         return () => window.removeEventListener("resize", handleResize)
-    }, [isInitialized, panels])
+    }, [isInitialized, panels, isMobile])
 
     // Save positions when they change (desktop only)
     useEffect(() => {
@@ -426,8 +457,18 @@ export default function PortfolioInterface() {
                 {isMobile ? (
                     <MobileLayout panels={panels} theme={theme} />
                 ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div key={`canvas-container-${resetKey}`} ref={canvasRef} className="relative w-full h-full max-w-[1600px] max-h-[960px] rounded-lg">
+                    <div ref={canvasHostRef} className="absolute inset-0 flex items-start justify-center overflow-auto">
+                        <div
+                            key={`canvas-container-${resetKey}`}
+                            ref={canvasRef}
+                            className="relative rounded-lg"
+                            style={{
+                                width: DESIGN_CANVAS_WIDTH,
+                                height: DESIGN_CANVAS_HEIGHT,
+                                transform: `scale(${canvasScale})`,
+                                transformOrigin: "top center",
+                            }}
+                        >
                             {/* Pixelated Banner — inside canvas so it respects max-w/max-h */}
                             <PixelatedBanner
                                 isBlurred={isInitialized && Object.values(panels).some(panel => panel.active)}
@@ -443,6 +484,7 @@ export default function PortfolioInterface() {
                                 bringToFront={bringToFront}
                                 togglePinPanel={togglePinPanel}
                                 DEFAULT_PANEL_DIMENSIONS={panelDimensions}
+                                canvasScale={canvasScale}
                             />
                         </div>
                     </div>

@@ -18,7 +18,7 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 const BLOCK = 17;
 const MARGIN = 3;
 const STEP = BLOCK + MARGIN;
-const WEEKS = 42;
+const WEEKS = 39;
 const FONT_SIZE = 14;
 const LABEL_HEIGHT = FONT_SIZE + 10;
 const SVG_HEIGHT = LABEL_HEIGHT + 7 * STEP - MARGIN;
@@ -247,7 +247,10 @@ export function CodingStatsPanel() {
                                         : `#${lcData.ranking?.toLocaleString()}`}
                                 </p>
                             </div>
-                            <img src="/icons/leetcode.svg" alt="LeetCode" className="w-5 h-5 shrink-0" />
+                            <>
+                                <img src="/icons/leetcode.svg" alt="LeetCode" className="w-5 h-5 shrink-0 dark:hidden" />
+                                <img src="/icons/leetcode-dark.svg" alt="LeetCode" className="w-5 h-5 shrink-0 hidden dark:block" />
+                            </>
                         </div>
 
                         {/* Streak + Contest */}

@@ -92,7 +92,10 @@ export function LeetCodeStats() {
                         <p className="text-muted-foreground text-xs leading-none mt-1">{data.topPercent != null ? `top ${data.topPercent}%` : `#${data.ranking.toLocaleString()}`}</p>
                     </div>
                 </div>
-                <img src="/icons/leetcode.svg" alt="LeetCode" className="w-5 h-5 shrink-0" />
+                <>
+                    <img src="/icons/leetcode.svg" alt="LeetCode" className="w-5 h-5 shrink-0 dark:hidden" />
+                    <img src="/icons/leetcode-dark.svg" alt="LeetCode" className="w-5 h-5 shrink-0 hidden dark:block" />
+                </>
             </div>
 
             {/* Streak + Contest */}

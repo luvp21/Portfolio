@@ -27,6 +27,7 @@ interface PanelProps {
   isPinned?: boolean
   onPinChange?: (isPinned: boolean) => void
   canvasBoundaries: { width: number; height: number }
+  canvasScale?: number
 }
 
 export function Panel({
@@ -48,6 +49,7 @@ export function Panel({
   isPinned = false,
   onPinChange,
   canvasBoundaries,
+  canvasScale = 1,
 }: PanelProps) {
   const [isResizing, setIsResizing] = useState(false)
   const [size, setSize] = useState({ width: defaultWidth, height: defaultHeight })
@@ -96,7 +98,7 @@ export function Panel({
   // Handle mouse down on title bar
   const handleTitleBarMouseDown = (e: React.MouseEvent) => {
     if (isPinned) return
-    
+
     // Only start dragging if clicking on the title bar itself, not on buttons
     const target = e.target as HTMLElement
     if (target.closest('button')) return
@@ -104,7 +106,7 @@ export function Panel({
     setIsDragging(true)
     setDragStartPos({ x: e.clientX, y: e.clientY })
     setInitialPanelPos({ x: x.get(), y: y.get() })
-    
+
     if (onFocus) onFocus()
     e.preventDefault()
     e.stopPropagation()
@@ -115,8 +117,8 @@ export function Panel({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging || isPinned) return
 
-      const deltaX = e.clientX - dragStartPos.x
-      const deltaY = e.clientY - dragStartPos.y
+      const deltaX = (e.clientX - dragStartPos.x) / canvasScale
+      const deltaY = (e.clientY - dragStartPos.y) / canvasScale
 
       let newX = initialPanelPos.x + deltaX
       let newY = initialPanelPos.y + deltaY
@@ -142,7 +144,7 @@ export function Panel({
     const handleMouseUp = () => {
       if (isDragging) {
         setIsDragging(false)
-        
+
         // Notify parent of final position
         if (onPositionChange) {
           onPositionChange(x.get(), y.get())
@@ -153,7 +155,7 @@ export function Panel({
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
@@ -188,9 +190,9 @@ export function Panel({
         height: isMinimized ? "auto" : size.height,
       }}
       initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ 
-        opacity: 1, 
-        scale: isDragging && !isPinned ? 1.02 : 1 
+      animate={{
+        opacity: 1,
+        scale: isDragging && !isPinned ? 1.02 : 1
       }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       id={id}

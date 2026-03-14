@@ -23,6 +23,7 @@ interface DesktopCanvasProps {
     bringToFront: (panel: PanelType) => void
     togglePinPanel: (panel: PanelType, isPinned: boolean) => void
     DEFAULT_PANEL_DIMENSIONS: Record<PanelType, PanelDimensions>
+    canvasScale: number
 }
 
 export function DesktopCanvas({
@@ -36,6 +37,7 @@ export function DesktopCanvas({
     bringToFront,
     togglePinPanel,
     DEFAULT_PANEL_DIMENSIONS,
+    canvasScale,
 }: DesktopCanvasProps) {
     return (
         <>
@@ -91,6 +93,7 @@ export function DesktopCanvas({
                             onPinChange={(isPinned) => togglePinPanel(panelType, isPinned)}
                             className="border border-blue-300/10"
                             canvasBoundaries={viewportSize}
+                            canvasScale={canvasScale}
                         >
                             {panelType === "about" && <ProfileCard />}
 

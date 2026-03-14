@@ -85,12 +85,17 @@ export const PROFILE_LINKS = [
     {
         label: "LeetCode",
         href: "https://leetcode.com/u/luvv21/",
-        icon: <img src="/icons/leetcode.svg" alt="LeetCode" className="w-5 h-5 object-contain" />,
+        icon: (
+            <>
+                <img src="/icons/leetcode.svg" alt="LeetCode" className="w-5 h-5 object-contain dark:hidden" />
+                <img src="/icons/leetcode-dark.svg" alt="LeetCode" className="w-5 h-5 object-contain hidden dark:block" />
+            </>
+        ),
     },
     {
         label: "Codeforces",
         href: "https://codeforces.com/profile/luvv",
-        icon: <img src="/icons/cf.svg" alt="Codeforces" className="w-5 h-5 object-contain" />,
+        icon: <img src="/icons/cf.svg" alt="Codeforces" className="w-5 h-5 object-contain dark:invert" />,
     },
 ]
 
