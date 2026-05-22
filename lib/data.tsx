@@ -197,6 +197,15 @@ export const PROJECTS: Project[] = [
         liveUrl: "", // Add live demo link here if available
     },
     {
+        title: "DinoSprint – Pixel Endless Runner",
+        description:
+            "Chrome Dino–style endless runner with leaderboard, unlockable skins, and session stats.",
+        tags: ["Vite", "TypeScript", "React", "Tailwind", "Supabase", "Vercel"],
+        image: "/Dino.png",
+        githubUrl: "https://github.com/luvp21/Dino",
+        liveUrl: "https://dinosprint.vercel.app/",
+    },
+    {
         title: "EV Rental Website",
         description:
             "EV rental system managing 100+ bookings with QR vehicle access, wallet dashboard, and automated damage verification via Cloudinary. Won Breach FinTech Hackathon.",
