@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from "@/components/theme-provider"
-import { Caveat, Press_Start_2P } from 'next/font/google'
+import { Caveat, Press_Start_2P, Gaegu } from 'next/font/google'
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -13,6 +13,12 @@ const pressStart2P = Press_Start_2P({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-pixel',
+})
+
+const gaegu = Gaegu({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-gaegu',
 })
 
 export const metadata: Metadata = {
@@ -67,7 +73,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${caveat.variable} ${pressStart2P.variable}`}>
+      <body className={`${caveat.variable} ${pressStart2P.variable} ${gaegu.variable}`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

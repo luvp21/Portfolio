@@ -2,18 +2,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Eye } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 interface Props {
     incrementOnMount?: boolean;
     className?: string;
 }
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 const LAST_VISIT_KEY = "last_visit_date";
 const VISITOR_ID_KEY = "visitor_id";
@@ -120,13 +115,8 @@ export function LiveVisitorBadge({ incrementOnMount = true, className = "" }: Pr
             }
         );
 
-        // subscribe (subscribe returns a promise; we don't want to assign that to `channel`)
-        const ch = channel.subscribe();
-        // read runtime state in a type-safe-ish way
-        const state = (ch as unknown as { state?: string }).state;
-        if (state && state !== "SUBSCRIBED") {
-            console.error("Supabase subscription error:", state);
-        }
+        // subscribe
+        channel.subscribe();
 
         // synchronous cleanup
         return () => {

@@ -195,9 +195,84 @@ export const Sandbox = React.memo(function Sandbox() {
       const y_position = Math.random() * (containerHeight - margin * 2) + margin
       const color = getRandomColor()
 
+      // Automatically collect rich hardware and network telemetry
+      let gpu = "unknown"
+      try {
+        const testCanvas = document.createElement("canvas")
+        const gl = testCanvas.getContext("webgl") || (testCanvas.getContext("experimental-webgl") as any)
+        if (gl) {
+          const debugInfo = gl.getExtension("WEBGL_debug_renderer_info")
+          if (debugInfo) {
+            gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || "unknown"
+          }
+        }
+      } catch (e) {}
+
+      let connection = {}
+      const nav = typeof navigator !== "undefined" ? (navigator as any) : null
+      if (nav && nav.connection) {
+        connection = {
+          effectiveType: nav.connection.effectiveType || "",
+          downlink: nav.connection.downlink || 0,
+          rtt: nav.connection.rtt || 0,
+          saveData: !!nav.connection.saveData,
+        }
+      }
+
+      // Retrieve or generate a persistent local visitor ID
+      let visitorId = "unknown"
+      if (typeof window !== "undefined") {
+        const storedId = localStorage.getItem("portfolio_visitor_id")
+        if (storedId) {
+          visitorId = storedId
+        } else {
+          visitorId = "visitor_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+          localStorage.setItem("portfolio_visitor_id", visitorId)
+        }
+      }
+
+      // Generate a stable FNV-1a browser fingerprint hash from hardware + locale properties
+      let browserFingerprint = "unknown"
+      try {
+        const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : ""
+        const language = typeof navigator !== "undefined" ? navigator.language : ""
+        const timezone = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : ""
+        const screenRes = typeof window !== "undefined" ? `${window.screen.width}x${window.screen.height}` : ""
+        const cores = typeof navigator !== "undefined" ? navigator.hardwareConcurrency || "" : ""
+        const ram = typeof navigator !== "undefined" ? (navigator as any).deviceMemory || "" : ""
+        
+        const rawString = [userAgent, language, timezone, screenRes, cores, ram, gpu].join("|")
+        
+        // Fast FNV-1a 32-bit hash algorithm
+        let hash = 2166136261
+        for (let i = 0; i < rawString.length; i++) {
+          hash ^= rawString.charCodeAt(i)
+          hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24)
+        }
+        browserFingerprint = (hash >>> 0).toString(16)
+      } catch (e) {}
+
+      const metadata = {
+        visitorId,
+        browserFingerprint,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        language: typeof navigator !== "undefined" ? navigator.language : "",
+        timezone: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "",
+        screenResolution: typeof window !== "undefined" ? `${window.screen.width}x${window.screen.height}` : "",
+        viewportSize: typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "",
+        devicePixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1,
+        maxTouchPoints: typeof navigator !== "undefined" ? navigator.maxTouchPoints : 0,
+        cpuCores: typeof navigator !== "undefined" ? navigator.hardwareConcurrency || "unknown" : "unknown",
+        deviceMemoryGb: typeof navigator !== "undefined" ? (navigator as any).deviceMemory || "unknown" : "unknown",
+        gpu,
+        connection,
+        referrer: typeof document !== "undefined" ? document.referrer || "direct" : "direct",
+        submittedAt: new Date().toISOString(),
+      }
+
       const { data, error } = await supabase
         .from("messages")
-        .insert([{ name, message, x_position, y_position, color }])
+        .insert([{ name, message, x_position, y_position, color, metadata }])
         .select()
 
       if (error) {
@@ -256,12 +331,12 @@ export const Sandbox = React.memo(function Sandbox() {
 
   // Animate particles
   useEffect(() => {
-    if (!containerRef.current || particles.length === 0) return
-
-    const containerWidth = containerRef.current.clientWidth
-    const containerHeight = containerRef.current.clientHeight
-
     const interval = setInterval(() => {
+      if (!containerRef.current) return
+
+      const containerWidth = containerRef.current.clientWidth
+      const containerHeight = containerRef.current.clientHeight
+
       setParticles((prev) =>
         prev.map((particle) => ({
           ...particle,
@@ -270,16 +345,16 @@ export const Sandbox = React.memo(function Sandbox() {
           // Reset particle if it goes off screen
           ...(particle.y > containerHeight
             ? {
-              y: 0,
-              x: Math.random() * containerWidth,
-            }
+                y: 0,
+                x: Math.random() * containerWidth,
+              }
             : {}),
         })),
       )
     }, 50)
 
     return () => clearInterval(interval)
-  }, [particles, width, height])
+  }, [])
 
   // Draw stars and connections on canvas
   const drawStars = useCallback(() => {
@@ -602,12 +677,12 @@ export const Sandbox = React.memo(function Sandbox() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-40 p-4"
+            className="absolute inset-0 flex items-start justify-center bg-black/70 backdrop-blur-sm z-40 p-4 overflow-y-auto hide-scrollbar"
           >
             <motion.div
               initial={{ y: 20 }}
               animate={{ y: 0 }}
-              className={`w-full rounded-lg p-6 border ${isMobile ? "max-w-sm" : "max-w-md"}`}
+              className={`w-full rounded-lg p-5 md:p-6 border ${isMobile ? "max-w-sm" : "max-w-md"} my-auto`}
               style={{
                 backgroundColor: backgroundColor,
                 backdropFilter: "blur(12px)",
@@ -622,7 +697,7 @@ export const Sandbox = React.memo(function Sandbox() {
                 </Button>
               </div>
 
-              <form onSubmit={addMessage} className="space-y-4">
+              <form onSubmit={addMessage} className="space-y-3">
                 <div className="space-y-2">
                   <label
                     htmlFor="name"

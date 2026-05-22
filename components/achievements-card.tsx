@@ -1,39 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Award, Star, Trophy, Medal, Sparkles } from "lucide-react"
+import { Award, Star, Trophy, Medal, Sparkles, ExternalLink } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-
-interface Achievement {
-  id: string
-  title: string
-  description: string
-  icon: "award" | "star" | "trophy" | "medal" | "sparkles"
-  date?: string
-}
+import { ACHIEVEMENTS } from "@/lib/data"
 
 export function AchievementsCard() {
-  const achievements: Achievement[] = [
-    {
-      id: "1",
-      title: "Hackathon Winner",
-      description: "1st place at Breach FinTech hackathon (at PDEU) with an AI-powered EV rental system.",
-      icon: "trophy",
-      date: "May 2025",
-    },
-    {
-      id: "2",
-      title: "LeetCode",
-      description: "Solved 100+ problems on LeetCode, building strong DSA fundamentals.",
-      icon: "award",
-    },
-    {
-      id: "3",
-      title: "Codeforces",
-      description: "Reached Pupil rank and solved 250+ problems on Codeforces.",
-      icon: "star",
-    }
-  ]
 
   const getIcon = (iconType: string) => {
     switch (iconType) {
@@ -56,7 +28,7 @@ export function AchievementsCard() {
     <div className="p-2 h-full overflow-y-auto hide-scrollbar ">
 
       <div className="space-y-3">
-        {achievements.map((achievement) => (
+        {ACHIEVEMENTS.map((achievement) => (
           <motion.div
             key={achievement.id}
             className="px-2 flex items-center gap-3"
@@ -67,16 +39,29 @@ export function AchievementsCard() {
             <div className="p-2 rounded-full bg-primary/10 text-name">
               {getIcon(achievement.icon)}
             </div>
-            <div className="flex-1">
-              <div className="text-lg flex items-center gap-2 font-bold">
-                {achievement.title}
-                {achievement.date && (
-                  <Badge variant="outline" className="text-xs">
-                    {achievement.date}
-                  </Badge>
-                )}
+            <div className="flex-1 min-w-0">
+              <div className="text-lg flex items-center justify-between gap-4 font-bold">
+                <span className="truncate">{achievement.title}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {achievement.date && (
+                    <Badge variant="outline" className="text-xs font-semibold whitespace-nowrap">
+                      {achievement.date}
+                    </Badge>
+                  )}
+                  {achievement.certificateUrl && (
+                    <a
+                      href={achievement.certificateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors pointer-events-auto whitespace-nowrap"
+                    >
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      <span>Certificate</span>
+                    </a>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">{achievement.description}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{achievement.description}</p>
             </div>
           </motion.div>
         ))}

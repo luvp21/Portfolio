@@ -29,7 +29,7 @@ export const ProjectCard = memo(function ProjectCard({
     // allow overflow so tooltips aren't clipped
     <TooltipProvider delayDuration={0}>
       <motion.div
-        className="rounded-2xl overflow-visible border bg-card text-card-foreground"
+        className="flex flex-col h-full rounded-2xl overflow-visible border bg-card text-card-foreground"
       >
         {/* IMAGE */}
         <div className="relative overflow-hidden rounded-t-2xl">
@@ -42,7 +42,7 @@ export const ProjectCard = memo(function ProjectCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-40" />
         </div>
 
-        <div className="p-5">
+        <div className="p-5 flex flex-col flex-grow">
           {/* TITLE + ICONS (GitHub / Live) */}
           <div className="flex items-start justify-between">
             <h3 className="text-xl font-semibold text-foreground">{title}</h3>
@@ -104,35 +104,39 @@ export const ProjectCard = memo(function ProjectCard({
           <p className="mt-2 text-sm text-muted-foreground">{description}</p>
 
           {/* TECHNOLOGIES */}
-          <div className="mt-5 text-sm font-medium text-muted-foreground">Technologies</div>
+          <div className="mt-auto pt-5">
+            <div className="text-sm font-medium text-muted-foreground">Technologies</div>
 
-          <div className="mt-3 flex items-center gap-3">
-            {tags.map((tag) => {
-              const Icon = techIcons[tag]
-              return (
-                <Tooltip key={tag}>
-                  <TooltipTrigger asChild>
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      className="flex items-center justify-center w-[22px] h-[22px]"
-                      aria-label={tag}
+            <div className="mt-3 flex flex-wrap items-center gap-2.5">
+              {tags.map((tag) => {
+                const Icon = techIcons[tag]
+                if (!Icon) return null // Drop text fallback completely
+                
+                return (
+                  <Tooltip key={tag}>
+                    <TooltipTrigger asChild>
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className="flex items-center justify-center w-[22px] h-[22px] transition-transform hover:scale-110"
+                        aria-label={tag}
+                      >
+                        {Icon}
+                      </div>
+                    </TooltipTrigger>
+
+                    <TooltipContent
+                      side="top"
+                      sideOffset={8}
+                      avoidCollisions={false}
+                      className="!z-[99999] pointer-events-none"
                     >
-                      {Icon || <span className="text-xs text-muted-foreground">{tag}</span>}
-                    </div>
-                  </TooltipTrigger>
-
-                  <TooltipContent
-                    side="top"
-                    sideOffset={8}
-                    avoidCollisions={false}
-                    className="!z-[99999] pointer-events-none"
-                  >
-                    <p className="whitespace-nowrap">{tag}</p>
-                  </TooltipContent>
-                </Tooltip>
-              )
-            })}
+                      <p className="whitespace-nowrap">{tag}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              })}
+            </div>
           </div>
         </div>
       </motion.div>
