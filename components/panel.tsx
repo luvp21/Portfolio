@@ -173,6 +173,79 @@ export function Panel({
     }
   }
 
+  // Handle panel resizing via mouse
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsResizing(true)
+
+    const startWidth = size.width
+    const startHeight = size.height
+    const startX = e.clientX
+    const startY = e.clientY
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = (moveEvent.clientX - startX) / canvasScale
+      const deltaY = (moveEvent.clientY - startY) / canvasScale
+
+      const minWidth = 280
+      const minHeight = 200
+      const maxX = canvasBoundaries.width - x.get()
+      const maxY = canvasBoundaries.height - y.get()
+
+      const newWidth = Math.max(minWidth, Math.min(startWidth + deltaX, maxX))
+      const newHeight = Math.max(minHeight, Math.min(startHeight + deltaY, maxY))
+
+      setSize({ width: newWidth, height: newHeight })
+    }
+
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+  }
+
+  // Handle panel resizing via touch (tablet/mobile simulation)
+  const handleResizeTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation()
+    setIsResizing(true)
+
+    const touch = e.touches[0]
+    const startWidth = size.width
+    const startHeight = size.height
+    const startX = touch.clientX
+    const startY = touch.clientY
+
+    const handleTouchMove = (moveEvent: TouchEvent) => {
+      const currentTouch = moveEvent.touches[0]
+      const deltaX = (currentTouch.clientX - startX) / canvasScale
+      const deltaY = (currentTouch.clientY - startY) / canvasScale
+
+      const minWidth = 280
+      const minHeight = 200
+      const maxX = canvasBoundaries.width - x.get()
+      const maxY = canvasBoundaries.height - y.get()
+
+      const newWidth = Math.max(minWidth, Math.min(startWidth + deltaX, maxX))
+      const newHeight = Math.max(minHeight, Math.min(startHeight + deltaY, maxY))
+
+      setSize({ width: newWidth, height: newHeight })
+    }
+
+    const handleTouchEnd = () => {
+      setIsResizing(false)
+      document.removeEventListener("touchmove", handleTouchMove)
+      document.removeEventListener("touchend", handleTouchEnd)
+    }
+
+    document.addEventListener("touchmove", handleTouchMove, { passive: false })
+    document.addEventListener("touchend", handleTouchEnd)
+  }
+
   return (
     <motion.div
       ref={panelRef}
@@ -180,6 +253,7 @@ export function Panel({
         "bg-card rounded-lg shadow-lg overflow-hidden absolute",
         isMinimized && "h-12 overflow-hidden",
         isPinned && "border-2 border-primary/30",
+        isResizing && "ring-2 ring-primary/40",
         className,
       )}
       style={{
@@ -210,7 +284,7 @@ export function Panel({
       >
         <div className="flex items-center gap-2">
           {icon && <span className="text-muted-foreground">{icon}</span>}
-          <h3 className="font-medium">{title}</h3>
+          <h3 className="font-medium select-none">{title}</h3>
         </div>
         <div className="flex items-center gap-1">
           {onPinChange && (
@@ -235,6 +309,25 @@ export function Panel({
       <div className={cn("h-[calc(100%-3rem)] overflow-y-scroll hide-scrollbar", isMinimized && "hidden")}>
         {children}
       </div>
+
+      {/* Aesthetic Scale-Aware Corner Resize Handle */}
+      {!isMinimized && !isPinned && (
+        <div
+          className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50 flex items-end justify-end p-1 select-none group"
+          onMouseDown={handleResizeMouseDown}
+          onTouchStart={handleResizeTouchStart}
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            className="text-muted-foreground/30 group-hover:text-primary/70 active:text-primary transition-colors pointer-events-none"
+          >
+            <line x1="12" y1="4" x2="4" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="12" y1="8" x2="8" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+      )}
     </motion.div>
   )
 }

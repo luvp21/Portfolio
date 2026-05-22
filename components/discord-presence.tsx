@@ -91,8 +91,6 @@ function DiscordSkeleton() {
             </div>
             <div className="flex items-start justify-between px-4 pb-4">
                 <div className="flex flex-col gap-2">
-                    backgroundColor: "hsl(var(--muted) / 0.35)",
-                    backgroundImage: "radial-gradient(hsl(var(--foreground) / 0.22) 1px, transparent 1px)",
                     <div className="h-3 w-14 rounded bg-muted mt-1" />
                 </div>
                 <div className="w-5 h-5 rounded bg-muted mt-0.5" />

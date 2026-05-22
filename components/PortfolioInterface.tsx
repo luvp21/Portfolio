@@ -27,12 +27,12 @@ const getDefaultPanelDimensions = (
     const scale = Math.min(1, canvasW / 1440, canvasH / 810)
     const s = (base: number, min: number) => Math.max(min, Math.round(base * scale))
     return {
-        about: { width: s(450, 340), height: s(340, 280) },
-        projects: { width: s(900, 790), height: s(660, 520) },
-        experience: { width: s(500, 400), height: s(580, 450) },
-        message: { width: s(800, 560), height: s(500, 380) },
-        stack: { width: s(450, 340), height: s(330, 270) },
-        achievements: { width: s(500, 390), height: s(350, 290) },
+        about: { width: s(480, 360), height: s(400, 340) },
+        projects: { width: s(900, 790), height: s(700, 520) },
+        experience: { width: s(700, 400), height: s(640, 480) },
+        message: { width: s(1000, 800), height: s(600, 460) },
+        stack: { width: s(520, 380), height: s(330, 280) },
+        achievements: { width: s(680, 400), height: s(520, 320) },
     }
 }
 
@@ -124,36 +124,16 @@ export default function PortfolioInterface() {
     const { isMobile } = useResponsive()
     const canvasRef = useRef<HTMLDivElement | null>(null)
     const canvasHostRef = useRef<HTMLDivElement | null>(null)
-    const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 })
+    const [viewportSize, setViewportSize] = useState({ width: 1440, height: 810 })
     const [canvasScale, setCanvasScale] = useState(1)
 
     // Panel dimensions scale with the actual canvas size
     const panelDimensions = useMemo(() => {
-        const vw = viewportSize.width || (typeof window !== "undefined" ? window.innerWidth : 1440)
-        const vh = viewportSize.height || (typeof window !== "undefined" ? window.innerHeight : 810)
-        return getDefaultPanelDimensions(vw, vh)
+        return getDefaultPanelDimensions(viewportSize.width, viewportSize.height)
     }, [viewportSize])
 
-    // Lazy initialize panels so mobile gets active panels on first client render
-    const [panels, setPanels] = useState<Record<PanelType, PanelState>>(() => {
-        if (typeof window !== "undefined") {
-            const vw = window.innerWidth
-            const vh = window.innerHeight
-            const dims = getDefaultPanelDimensions(vw, vh)
-            const initial = createDefaultPanelState(vw, vh, dims)
-
-            if (vw < 768) {
-                Object.keys(initial).forEach((k) => {
-                    const p = k as PanelType
-                    initial[p] = { ...initial[p], active: true, minimized: false }
-                })
-            }
-
-            return initial
-        }
-
-        return {} as Record<PanelType, PanelState>
-    })
+    // Initialize empty panels to prevent SSR/hydration mismatch; loaded dynamically inside client-side useEffect mount
+    const [panels, setPanels] = useState<Record<PanelType, PanelState>>({} as Record<PanelType, PanelState>)
 
     const [isInitialized, setIsInitialized] = useState(false)
     const [resetKey, setResetKey] = useState(0)
@@ -163,20 +143,18 @@ export default function PortfolioInterface() {
     // Scale whole desktop canvas up/down based on available space
     useEffect(() => {
         if (isMobile) return
+        const host = canvasHostRef.current
+        if (!host) return
 
-        const updateScale = () => {
-            const host = canvasHostRef.current
-            if (!host) return
-            const rect = host.getBoundingClientRect()
-            const sx = rect.width / DESIGN_CANVAS_WIDTH
-            const sy = rect.height / DESIGN_CANVAS_HEIGHT
-            const scale = Math.max(0.4, Math.min(sx, sy))
-            setCanvasScale(scale)
-        }
+        const ro = new ResizeObserver(([entry]) => {
+            const { width, height } = entry.contentRect
+            const sx = width / DESIGN_CANVAS_WIDTH
+            const sy = height / DESIGN_CANVAS_HEIGHT
+            setCanvasScale(Math.max(0.4, Math.min(sx, sy)))
+        })
 
-        updateScale()
-        window.addEventListener("resize", updateScale)
-        return () => window.removeEventListener("resize", updateScale)
+        ro.observe(host)
+        return () => ro.disconnect()
     }, [isMobile])
 
     // Initializer effect: loads saved desktop positions, but NEVER overwrites mobile initial active panels
@@ -410,7 +388,7 @@ export default function PortfolioInterface() {
     }
 
     return (
-        <div className="h-screen w-full transition-colors duration-300 flex flex-col">
+        <div className="h-dvh w-full transition-colors duration-300 flex flex-col">
             {/* Header */}
             <header className="flex-none h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border flex items-center justify-between px-4 z-[9999]">
                 {/* Left slot */}
@@ -457,7 +435,7 @@ export default function PortfolioInterface() {
                 {isMobile ? (
                     <MobileLayout panels={panels} theme={theme} />
                 ) : (
-                    <div ref={canvasHostRef} className="absolute inset-0 flex items-start justify-center overflow-auto">
+                    <div ref={canvasHostRef} className="absolute inset-0 flex items-center justify-center overflow-hidden">
                         <div
                             key={`canvas-container-${resetKey}`}
                             ref={canvasRef}
@@ -466,7 +444,7 @@ export default function PortfolioInterface() {
                                 width: DESIGN_CANVAS_WIDTH,
                                 height: DESIGN_CANVAS_HEIGHT,
                                 transform: `scale(${canvasScale})`,
-                                transformOrigin: "top center",
+                                transformOrigin: "center center",
                             }}
                         >
                             {/* Pixelated Banner — inside canvas so it respects max-w/max-h */}

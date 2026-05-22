@@ -30,10 +30,12 @@ function formatIST(date: Date): string {
     }
 }
 
-export function WeatherClock() {
+export function TrigClock() {
+    const [mounted, setMounted] = useState(false);
     const [now, setNow] = useState(() => new Date());
 
     useEffect(() => {
+        setMounted(true);
         let intervalId: ReturnType<typeof setInterval> | undefined;
 
         const timeoutId = setTimeout(() => {
@@ -46,6 +48,18 @@ export function WeatherClock() {
             clearInterval(intervalId);
         };
     }, []);
+
+    if (!mounted) {
+        return (
+            <div className="bg-card/80 backdrop-blur-md px-4 py-2 pointer-events-auto select-none font-mono">
+                <div className="text-foreground text-[11px] sm:text-sm font-medium tracking-wider whitespace-nowrap overflow-hidden text-ellipsis">
+                    <span className="text-foreground">θ = 0.00rad · 0°</span>
+                    <span className="text-foreground px-2">|</span>
+                    <span>--:--:-- IST</span>
+                </div>
+            </div>
+        );
+    }
 
     const { seconds } = getISTFields(now);
 

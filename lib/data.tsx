@@ -35,7 +35,7 @@ export const PERSONAL = {
     bannerBio:
         "I'm a Computer Science student at Nirma University, and I don't always know how… but I end up building it anyway.",
     /** Longer bio shown in the About panel */
-    bio: "Computer Science student at Nirma University who enjoys turning ideas into working software and constantly learning new technologies.",
+    bio: "Pre-final year CS student at Nirma University & AI Intern at Befree Global. I build full-stack products, AI/ML models, and agentic workflows. Passionate about turning ambitious ideas into clean, robust code.",
     avatar: "/pp.png",
     /** Footer / banner path label */
     readmePath: "luvvv.me\u00a0/\u00a0README.md",
@@ -161,38 +161,58 @@ export interface Project {
 
 export const PROJECTS: Project[] = [
     {
-        title: "DinoSprint – Pixel Endless Runner",
+        title: "Voice Copilot | AI Restaurant Agent",
         description:
-            "Chrome Dino–style endless runner with leaderboard, unlockable skins, and session stats.",
-        tags: ["Vite", "TypeScript", "React", "Tailwind", "Supabase", "Vercel"],
-        image: "/Dino.png",
-        githubUrl: "https://github.com/luvp21/Dino",
-        liveUrl: "https://dinosprint.vercel.app/",
+            "Voice AI agent for restaurant operations, built for Petpooja POS (50k+ restaurants). Features Hinglish voice recognition across 12 languages over Twilio WebSockets and a market basket analytics engine. Runner-up at HACKaMINeD.",
+        tags: ["TypeScript", "Python", "Fastify", "PostgreSQL", "Docker", "Twilio WebSockets", "Hinglish STT"],
+        image: "/voice-copilot.png",
+        githubUrl: "https://github.com/luvp21/Voice-Copilot-AI-Restaurant-Agent",
+        liveUrl: "", // Add live demo link here if available
     },
     {
-        title: "Interactive Portfolio",
+        title: "BHOOMI | Satellite Forecasting",
         description:
-            "A canvas-based portfolio with draggable panels and Command Terminal",
-        tags: ["Next.js", "TypeScript", "Tailwind", "React", "Vercel"],
-        image: "/portfolio.png",
-        githubUrl: "https://github.com/luvp21/Portfolio",
-        liveUrl: "https://luv-patel.vercel.app/",
+            "Satellite environmental intelligence platform for Ahmedabad. Ingests data from ISRO Bhuvan, NASA MODIS, and ESA Sentinel. Forecasting via ARIMA, LSTM, and Prophet with LLM-generated PDF reports. Runner-up at Aetrix.",
+        tags: ["React", "TypeScript", "Python", "Flask", "PostgreSQL", "PyTorch", "XGBoost", "Mapbox GL", "Deck.gl"],
+        image: "/bhoomi.png",
+        githubUrl: "https://github.com/luvp21/bhoomi",
+        liveUrl: "https://bhoomi-seven.vercel.app", // Add live demo link here if available
+    },
+    {
+        title: "Agentic Honeypot",
+        description:
+            "LLM-powered anti-fraud system running a 10-turn AI conversation as a victim to extract UPI and bank scammer coordinates. Gemini 2.5 Flash, rule-based fallback, and async callback delivery. Finalist at GUVI-HCL national hackathon.",
+        tags: ["Python", "FastAPI", "Google Gemini", "Pydantic", "Docker"],
+        image: "/honeypot.png",
+        githubUrl: "https://github.com/luvp21/agentic-honeypot",
+        liveUrl: "", // Add live demo link here if available
+    },
+    {
+        title: "CollabDraw",
+        description:
+            "A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style. Supports multiple simultaneous drawers syncing instantly over WebSockets.",
+        tags: ["Next.js", "TypeScript", "Express", "WebSockets", "PostgreSQL", "Prisma", "Turborepo"],
+        image: "/excalidraw.png",
+        githubUrl: "https://github.com/luvp21/CollabDraw",
+        liveUrl: "", // Add live demo link here if available
     },
     {
         title: "EV Rental Website",
         description:
-            "EV rental system with secure KYC, real-time tracking, and automated payments.",
-        tags: ["React", "Tailwind", "MongoDB", "Node.js", "Vercel"],
+            "EV rental system managing 100+ bookings with QR vehicle access, wallet dashboard, and automated damage verification via Cloudinary. Won Breach FinTech Hackathon.",
+        tags: ["React", "Tailwind", "MongoDB", "Node.js", "Cloudinary"],
         image: "/erental.png",
-        githubUrl: "https://github.com/mihir1816/Deep-Drillers-2.0",
+        githubUrl: "https://github.com/luvp21/EV-Rental",
+        liveUrl: "https://deep-drillers-2-0.vercel.app/",
     },
     {
-        title: "Excalidraw Clone",
+        title: "Interactive Portfolio",
         description:
-            "A collaborative whiteboard tool for drawing, brainstorming, and visualizing ideas in a hand-drawn style.",
-        tags: ["TypeScript", "Next.js", "Tailwind", "Prisma", "PostgreSQL", "Socket.io"],
-        image: "/excalidraw.png",
-        githubUrl: "https://github.com/luvp21/Draw-App",
+            "A high-fidelity creative OS-style desktop canvas featuring draggable floating panels, live visitor counts, command pallette search, and real-time database-synced features.",
+        tags: ["Next.js", "TypeScript", "Tailwind", "Supabase"],
+        image: "/portfolio.png",
+        githubUrl: "https://github.com/luvp21/Portfolio",
+        liveUrl: "https://luvvv.me",
     },
 ]
 
@@ -214,41 +234,61 @@ export interface ExperienceItem {
 export const EXPERIENCE: ExperienceItem[] = [
     {
         id: 1,
+        title: "AI Intern - CoE AI Innovation",
+        company: "Befree Global",
+        period: "May 2026 – Present",
+        description:
+            "Developing internal AI tools for employee workflows on the CoE AI Innovation team. Built a natural language RAG-based query chatbot and a production-grade document extraction/analysis engine using LLMs, vector search, and custom pipelines.",
+        skills: ["LLMs", "Vector Search", "RAG Chatbots", "FastAPI", "Document Processing"],
+        icon: "company",
+    },
+    {
+        id: 2,
         title: "General Secretary",
         company: "Computer Society of India - Nirma University",
         period: "Aug 2025 – Present",
         description:
-            "Managing club operations, leading teams, and overseeing events and initiatives at CSI Nirma.",
-        skills: ["Leadership", "Team Management", "Communication"],
+            "Running the chapter's operations and technical teams across all major events. Led web dev and logistics for HACKaMINeD 2026 (48-hour hybrid hackathon, 2,400+ participants, 600+ teams) and HackNUthon 6.0 (1,000+ participants). Managing a committee of 30+ members across web, design, content, and operations.",
+        skills: ["Leadership", "Operations Management", "Event Logistics", "Team Collaboration"],
         icon: "organization",
     },
     {
-        id: 2,
-        title: "Core Committee Member",
+        id: 3,
+        title: "Core Committee Member (Full Stack Developer)",
         company: "Computer Society of India - Nirma University",
-        period: "Oct 2024 – Aug 2025",
-        description: "Developed CSI Nirma's official website.",
+        period: "Feb 2025 – Aug 2025",
+        description: "Built and maintain the chapter's event platform. Handled 1.1M+ HTTP requests across events with 98% uptime and 50k+ views. Developed an API-first backend to support multiple concurrent events.",
         skills: [
             "Node.js",
             "MongoDB",
             "Express",
             "JavaScript",
             "React",
+            "PostgreSQL",
             "Web Development",
         ],
         icon: "organization",
     },
     {
-        id: 3,
+        id: 4,
+        title: "Executive Committee Member",
+        company: "Computer Society of India - Nirma University",
+        period: "Oct 2024 – Feb 2025",
+        description: "First role in the chapter, contributing to event operations and web team during Cubix'25 planning.",
+        skills: ["Event Operations", "Web Assistance", "Teamwork"],
+        icon: "organization",
+    },
+    {
+        id: 5,
         title: "B.Tech in Computer Science and Engineering",
         company: "Nirma University",
         period: "2023 – 2027",
         description:
-            "Pursuing a B.Tech in Computer Science and Engineering at Nirma University.",
+            "Pursuing a Bachelor of Technology in Computer Science and Engineering at Nirma University. Grade: 8.35 CGPA.",
         skills: [
             "Data Structures and Algorithms",
             "OOP",
-            "Operating System",
+            "Operating Systems",
             "DBMS",
             "Full Stack Web Development",
         ],
@@ -267,29 +307,52 @@ export interface Achievement {
     description: string
     icon: AchievementIcon
     date?: string
+    certificateUrl?: string
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
     {
         id: "1",
-        title: "Hackathon Winner",
+        title: "Runner Up | HACKaMINeD",
         description:
-            "1st place at Breach FinTech hackathon (at PDEU) with an AI-powered EV rental system.",
+            "Won 2nd place at HACKaMINeD 2026 with Voice Copilot, an AI restaurant voice agent integrated with Petpooja POS.",
         icon: "trophy",
-        date: "May 2025",
+        date: "Mar 2026",
+        certificateUrl: "https://drive.google.com/file/d/16KjLWRUyfhQB8bBUsG_hzaBjtzlvu8Vx/view?usp=sharing",
     },
     {
         id: "2",
-        title: "LeetCode",
+        title: "Runner Up | Aetrix Hackathon",
         description:
-            "Solved 100+ problems on LeetCode, building strong DSA fundamentals.",
-        icon: "award",
+            "Won 2nd place at Aetrix Hackathon with BHOOMI, a satellite environmental intelligence and forecasting platform.",
+        icon: "trophy",
+        date: "Mar 2026",
+        certificateUrl: "https://drive.google.com/file/d/17doEogzjQKPRNtsiDGeXQzRuaxQ0aSf7/view?usp=sharing",
     },
     {
         id: "3",
-        title: "Codeforces",
-        description: "Reached Pupil rank and solved 250+ problems on Codeforces.",
-        icon: "star",
+        title: "Finalist | GUVI–HCL National Hackathon",
+        description:
+            "National finalist with Agentic Honeypot, an LLM-powered anti-fraud trap extracting UPI and bank scam coordinates.",
+        icon: "award",
+        date: "Feb 2026",
+        certificateUrl: "https://drive.google.com/file/d/17QbM4pfA4tdXBkoY6NI2qoowB-xbkJbH/view?usp=sharing",
+    },
+    {
+        id: "4",
+        title: "Winner | Breach Hackathon",
+        description:
+            "1st place at PDEU's Breach FinTech Hackathon with EV Rental Platform featuring QR-based access and Cloudinary.",
+        icon: "medal",
+        date: "Mar 2025",
+        certificateUrl: "https://drive.google.com/file/d/1vqtIVD1FBXioAMBudf_4Anx2mCZUZYb3/view?usp=sharing",
+    },
+    {
+        id: "5",
+        title: "Competitive Programming",
+        description:
+            "Solved 300+ problems on Codeforces (Pupil, peak rating 1216) and CodeChef (peak rating 1430).",
+        icon: "sparkles",
     },
 ]
 
