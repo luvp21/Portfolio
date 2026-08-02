@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { User, Briefcase, History, FileText, Layers, Award } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { SPRING_SNAPPY } from "@/lib/motion"
 
 type PanelType = "about" | "projects" | "experience" | "message" | "stack" | "achievements"
 
@@ -34,9 +35,9 @@ export function Dock({ onOpenPanel, activePanels }: DockProps) {
   return (
     <motion.div
       className=" left-0 right-0 mx-auto z-[9999] flex justify-center"
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      initial={{ opacity: 0, transform: "translateY(20px)" }}
+      animate={{ opacity: 1, transform: "translateY(0px)" }}
+      transition={SPRING_SNAPPY}
     >
       <div className="bg-background backdrop-blur-lg border border-muted/30 rounded-full shadow-lg px-4 py-2  hide-scrollbar max-w-full">
         <TooltipProvider delayDuration={200}>

@@ -18,7 +18,9 @@ function pickSentence() {
 }
 
 export function TypingTester() {
-    const [sentence, setSentence] = useState(pickSentence);
+    // Deterministic initial sentence avoids a server/client render mismatch
+    // (Math.random() would pick differently on server vs. client hydration).
+    const [sentence, setSentence] = useState(SENTENCES[0]);
     const [input, setInput] = useState("");
     const [startTime, setStartTime] = useState<number | null>(null);
     const [elapsed, setElapsed] = useState<number>(0);

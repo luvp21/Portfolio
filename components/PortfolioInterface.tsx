@@ -13,6 +13,7 @@ import { ThemeToggleButton } from "@/components/theme-toggle"
 import { LiveVisitorBadge } from "./LiveVisitorBadge"
 import { MobileLayout } from "@/components/MobileLayout"
 import { DesktopCanvas } from "@/components/DesktopCanvas"
+import { SeoContent } from "@/components/SeoContent"
 import type { PanelType, PanelState, PanelDimensions } from "./types"
 
 const DESIGN_CANVAS_WIDTH = 1440
@@ -252,7 +253,20 @@ export default function PortfolioInterface() {
     // Keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.ctrlKey && e.key === "k") || e.key === "/") {
+            if (e.ctrlKey && e.key === "k") {
+                e.preventDefault()
+                setShowCommandBar((prev) => !prev)
+                return
+            }
+
+            if (e.key === "/") {
+                // Don't hijack "/" while the user is typing in a field (e.g. the guestbook form)
+                const target = e.target as HTMLElement | null
+                const isTyping =
+                    !!target &&
+                    (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+                if (isTyping) return
+
                 e.preventDefault()
                 setShowCommandBar((prev) => !prev)
             }
@@ -389,6 +403,8 @@ export default function PortfolioInterface() {
 
     return (
         <div className="h-dvh w-full transition-colors duration-300 flex flex-col">
+            <SeoContent />
+
             {/* Header */}
             <header className="flex-none h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border flex items-center justify-between px-4 z-[9999]">
                 {/* Left slot */}

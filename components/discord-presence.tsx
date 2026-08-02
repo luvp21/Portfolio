@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SiDiscord, SiSpotify } from "react-icons/si";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const DISCORD_USER_ID = "1131273154367598592";
@@ -104,6 +104,7 @@ export function DiscordPresence() {
     const [data, setData] = useState<LanyardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const shouldReduceMotion = useReducedMotion();
 
     useEffect(() => {
         if (!DISCORD_USER_ID) return;
@@ -157,10 +158,10 @@ export function DiscordPresence() {
         <AnimatePresence>
             <motion.div
                 key="discord-presence"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                initial={{ opacity: 0, transform: shouldReduceMotion ? "translateY(0px)" : "translateY(8px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)" }}
+                exit={{ opacity: 0, transform: shouldReduceMotion ? "translateY(0px)" : "translateY(8px)" }}
+                transition={{ duration: shouldReduceMotion ? 0.15 : 0.35, ease: "easeOut" }}
                 className="w-full pointer-events-auto select-none overflow-hidden"
             >
                 {/* Big avatar */}

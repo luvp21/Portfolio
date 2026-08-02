@@ -12,7 +12,7 @@ export function TechStack() {
         return (
           <div
             key={tech.name}
-            className="relative flex flex-col items-center gap-2 px-2 py-4 transition-all "
+            className="relative flex flex-col items-center gap-2 px-2 py-4 transition-transform duration-200 hover:scale-105"
           >
             <Icon
               className="text-[36px] z-10"

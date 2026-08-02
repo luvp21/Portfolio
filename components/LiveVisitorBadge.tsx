@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Eye } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import { supabase } from "@/lib/supabaseClient";
 
 interface Props {
@@ -42,6 +43,7 @@ function getOrdinalSuffix(n: number) {
 export function LiveVisitorBadge({ incrementOnMount = true, className = "" }: Props) {
     const [count, setCount] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
+    const shouldReduceMotion = useReducedMotion();
 
     const didIncrementRef = useRef(false);
 
@@ -151,7 +153,15 @@ export function LiveVisitorBadge({ incrementOnMount = true, className = "" }: Pr
                 <span className="text-foreground">You are the</span>
 
                 <span className="relative font-semibold text-foreground text-base leading-none">
-                    {loading ? "…" : count ?? "—"}
+                    <motion.span
+                        key={loading ? "loading" : count}
+                        initial={shouldReduceMotion ? false : { scale: 1.3 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="inline-block"
+                    >
+                        {loading ? "…" : count ?? "—"}
+                    </motion.span>
 
                     {/* Superscript suffix */}
                     {!loading && count ? (

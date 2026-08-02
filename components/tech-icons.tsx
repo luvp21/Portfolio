@@ -11,8 +11,8 @@ import {
     SiNodedotjs,
     SiVercel,
     SiMysql,
-    SiSupabase,   
-    SiVite,       
+    SiSupabase,
+    SiVite,
     SiDocker,
     SiPython,
     SiFastapi,
@@ -22,6 +22,11 @@ import {
     SiGit,
     SiFastify,
     SiTurborepo,
+    SiTwilio,
+    SiMapbox,
+    SiGooglegemini,
+    SiPydantic,
+    SiCloudinary,
 } from "react-icons/si"
 
 export const techIcons: Record<string, JSX.Element> = {
@@ -45,14 +50,20 @@ export const techIcons: Record<string, JSX.Element> = {
     // Backend / BE tools
     "Node.js": <SiNodedotjs className="w-[22px] h-[22px] text-[#539E43]" />,
     "Socket.io": <SiSocketdotio className="w-[22px] h-[22px] text-black dark:text-white" />,
+    WebSockets: <SiSocketdotio className="w-[22px] h-[22px] text-black dark:text-white" />,
     Docker: <SiDocker className="w-[22px] h-[22px] text-[#2496ED]" />,
     Express: <SiExpress className="w-[22px] h-[22px] text-black dark:text-white" />,
     Fastify: <SiFastify className="w-[22px] h-[22px] text-black dark:text-white" />,
 
     // Extras
     Prisma: <SiPrisma className="w-[22px] h-[22px] text-black dark:text-white" />,
-    Supabase: <SiSupabase className="w-[22px] h-[22px] text-[#3ECF8E]" />, 
+    Supabase: <SiSupabase className="w-[22px] h-[22px] text-[#3ECF8E]" />,
     MDX: <SiMdx className="w-[22px] h-[22px] text-black dark:text-white" />,
     PyTorch: <SiPytorch className="w-[22px] h-[22px] text-[#EE4C2C]" />,
     Turborepo: <SiTurborepo className="w-[22px] h-[22px] text-[#EF4444]" />,
+    "Twilio WebSockets": <SiTwilio className="w-[22px] h-[22px] text-[#F22F46]" />,
+    "Mapbox GL": <SiMapbox className="w-[22px] h-[22px] text-black dark:text-white" />,
+    "Google Gemini": <SiGooglegemini className="w-[22px] h-[22px] text-[#8E75B2]" />,
+    Pydantic: <SiPydantic className="w-[22px] h-[22px] text-[#E92063]" />,
+    Cloudinary: <SiCloudinary className="w-[22px] h-[22px] text-[#3448C5]" />,
 }

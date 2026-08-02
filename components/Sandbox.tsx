@@ -4,13 +4,20 @@ import React from "react"
 import { Plus, X, MessageSquare, Info } from "lucide-react"
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useTheme } from "@/components/theme-provider"
+
+// Positions are stored relative to this fixed reference frame (matching the
+// panel's default size) so stars scale proportionally with the actual
+// container size instead of clumping toward an edge when the panel is
+// resized or opened at a different size than it was authored at.
+const REFERENCE_WIDTH = 1000
+const REFERENCE_HEIGHT = 600
 
 interface Message {
   id: number
@@ -112,6 +119,7 @@ export const Sandbox = React.memo(function Sandbox() {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const [particles, setParticles] = useState<{ x: number; y: number; size: number; speed: number }[]>([])
+  const shouldReduceMotion = useReducedMotion()
   const { theme } = useTheme()
 
   const { width, height, isMobile, isTablet } = useResponsiveDimensions()
@@ -131,9 +139,13 @@ export const Sandbox = React.memo(function Sandbox() {
     const containerHeight = containerRef.current.clientHeight
     const margin = isMobile ? 30 : 40
 
-    // Clamp position within bounds with margin
-    const normalizedX = Math.max(margin, Math.min(x, containerWidth - margin - starSize.outer))
-    const normalizedY = Math.max(margin, Math.min(y, containerHeight - margin - starSize.outer))
+    // Scale from the reference frame to the actual container size
+    const scaledX = (x / REFERENCE_WIDTH) * containerWidth
+    const scaledY = (y / REFERENCE_HEIGHT) * containerHeight
+
+    // Clamp as a safety net for edge cases (very narrow/short containers)
+    const normalizedX = Math.max(margin, Math.min(scaledX, containerWidth - margin - starSize.outer))
+    const normalizedY = Math.max(margin, Math.min(scaledY, containerHeight - margin - starSize.outer))
 
     return { x: normalizedX, y: normalizedY }
   }, [isMobile, starSize.outer])
@@ -186,13 +198,12 @@ export const Sandbox = React.memo(function Sandbox() {
     setIsLoading(true)
 
     try {
-      // Generate random position within the canvas with responsive margins
-      const containerWidth = containerRef.current?.clientWidth || width
-      const containerHeight = containerRef.current?.clientHeight || height
-
-      const margin = isMobile ? 30 : 40 // Larger margin on mobile for touch targets
-      const x_position = Math.random() * (containerWidth - margin * 2) + margin
-      const y_position = Math.random() * (containerHeight - margin * 2) + margin
+      // Generate random position within the fixed reference frame (not the
+      // current container's pixel size) so it renders correctly at any
+      // container size — see normalizePosition.
+      const margin = 40
+      const x_position = Math.random() * (REFERENCE_WIDTH - margin * 2) + margin
+      const y_position = Math.random() * (REFERENCE_HEIGHT - margin * 2) + margin
       const color = getRandomColor()
 
       // Automatically collect rich hardware and network telemetry
@@ -306,16 +317,9 @@ export const Sandbox = React.memo(function Sandbox() {
     }
   }
 
-  // Initialize particles with responsive count
-  useEffect(() => {
-    if (!containerRef.current) return
-
-    const containerWidth = containerRef.current.clientWidth
-    const containerHeight = containerRef.current.clientHeight
-
-    // Adjust particle count based on screen size
+  // Create a fresh particle set sized to the given container dimensions
+  const createParticles = useCallback((containerWidth: number, containerHeight: number) => {
     const particleCount = isMobile ? 20 : isTablet ? 35 : 50
-
     const newParticles = []
     for (let i = 0; i < particleCount; i++) {
       newParticles.push({
@@ -325,9 +329,14 @@ export const Sandbox = React.memo(function Sandbox() {
         speed: Math.random() * 0.3 + 0.1,
       })
     }
+    return newParticles
+  }, [isMobile, isTablet])
 
-    setParticles(newParticles)
-  }, [width, height, isMobile, isTablet])
+  // Initialize particles with responsive count
+  useEffect(() => {
+    if (!containerRef.current) return
+    setParticles(createParticles(containerRef.current.clientWidth, containerRef.current.clientHeight))
+  }, [width, height, isMobile, isTablet, createParticles])
 
   // Animate particles
   useEffect(() => {
@@ -447,14 +456,31 @@ export const Sandbox = React.memo(function Sandbox() {
     fetchMessages()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Redraw stars when messages or dimensions change
+  // Redraw stars when messages or window dimensions change
   useEffect(() => {
     drawStars()
   }, [messages, width, height, isMobile, isTablet, theme]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Re-sync canvas + particles when the container itself resizes (e.g. panel
+  // drag-resize). Window-resize listeners (useResponsiveDimensions) miss this
+  // entirely, since resizing the panel doesn't change window.innerWidth/Height:
+  // - the canvas's CSS box stretches automatically, but its drawing buffer
+  //   resolution does not, so the last-drawn bitmap gets stretched/warped.
+  // - particles keep the absolute pixel positions they were spawned with,
+  //   so they stay clumped in the old bounds until they individually wrap.
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const ro = new ResizeObserver(() => {
+      drawStars()
+      setParticles(createParticles(container.clientWidth, container.clientHeight))
+    })
+    ro.observe(container)
+    return () => ro.disconnect()
+  }, [drawStars, createParticles])
+
   // Theme-aware colors
-  const primaryColor = theme === "dark" ? "#fffff3" : "hsl(var(--name))"
-  const secondaryColor = theme === "dark" ? "#A374FF" : "hsl(var(--primary))"
   const backgroundColor = theme === "dark" ? "#101010" : "#ffffff"
   const borderColor = theme === "dark" ? "rgba(163, 116, 255, 0.3)" : "rgba(124, 58, 237, 0.3)"
   const textColor = theme === "dark" ? "#fffff3" : "hsl(var(--foreground))"
@@ -497,10 +523,10 @@ export const Sandbox = React.memo(function Sandbox() {
               left: `${normalizedPos.x}px`,
               top: `${normalizedPos.y}px`,
             }}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: isMobile ? 1.1 : 1.2 }} // Smaller hover scale on mobile
-            whileTap={{ scale: 0.95 }} // Add tap feedback for mobile
+            initial={{ transform: shouldReduceMotion ? "scale(1)" : "scale(0)", opacity: shouldReduceMotion ? 0 : 1 }}
+            animate={{ transform: "scale(1)", opacity: 1 }}
+            whileHover={{ transform: isMobile ? "scale(1.1)" : "scale(1.2)" }} // Smaller hover scale on mobile
+            whileTap={{ transform: "scale(0.95)" }} // Add tap feedback for mobile
             onMouseEnter={() => !isMobile && setHoveredMessage(msg)} // Only on hover for desktop
             onMouseLeave={() => !isMobile && setHoveredMessage(null)}
             onClick={() => isMobile && setHoveredMessage(hoveredMessage?.id === msg.id ? null : msg)} // Toggle on mobile
@@ -674,9 +700,9 @@ export const Sandbox = React.memo(function Sandbox() {
       <AnimatePresence>
         {showForm && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, transform: shouldReduceMotion ? "scale(1)" : "scale(0.9)" }}
+            animate={{ opacity: 1, transform: "scale(1)" }}
+            exit={{ opacity: 0, transform: shouldReduceMotion ? "scale(1)" : "scale(0.9)" }}
             className="absolute inset-0 flex items-start justify-center bg-black/70 backdrop-blur-sm z-40 p-4 overflow-y-auto hide-scrollbar"
           >
             <motion.div

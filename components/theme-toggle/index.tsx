@@ -552,6 +552,10 @@ export const createAnimation = (
 
 const STYLE_ID = "theme-transition-styles";
 
+const prefersReducedMotion = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export const useThemeToggle = ({
     variant = "circle",
     start = "center",
@@ -586,20 +590,20 @@ export const useThemeToggle = ({
     const toggleTheme = useCallback(() => {
         setIsDark((s) => !s);
 
-        const animation = createAnimation(variant, start, blur, gifUrl);
-        updateStyles(animation.css);
-
-        if (typeof window === "undefined") return;
-
         const switchTheme = () => {
             // theme is the stored value (light/dark)
             setTheme(theme === "light" ? "dark" : "light");
         };
 
-        if (!("startViewTransition" in document)) {
+        if (typeof window === "undefined") return;
+
+        if (prefersReducedMotion() || !("startViewTransition" in document)) {
             switchTheme();
             return;
         }
+
+        const animation = createAnimation(variant, start, blur, gifUrl);
+        updateStyles(animation.css);
 
         // @ts-ignore - experimental API
         (document as any).startViewTransition(switchTheme);
@@ -607,27 +611,27 @@ export const useThemeToggle = ({
 
     const setCrazyLightTheme = useCallback(() => {
         setIsDark(false);
-        const animation = createAnimation(variant, start, blur, gifUrl);
-        updateStyles(animation.css);
-        if (typeof window === "undefined") return;
         const switchTheme = () => setTheme("light");
-        if (!("startViewTransition" in document)) {
+        if (typeof window === "undefined") return;
+        if (prefersReducedMotion() || !("startViewTransition" in document)) {
             switchTheme();
             return;
         }
+        const animation = createAnimation(variant, start, blur, gifUrl);
+        updateStyles(animation.css);
         (document as any).startViewTransition(switchTheme);
     }, [setTheme, variant, start, blur, gifUrl, updateStyles]);
 
     const setCrazyDarkTheme = useCallback(() => {
         setIsDark(true);
-        const animation = createAnimation(variant, start, blur, gifUrl);
-        updateStyles(animation.css);
-        if (typeof window === "undefined") return;
         const switchTheme = () => setTheme("dark");
-        if (!("startViewTransition" in document)) {
+        if (typeof window === "undefined") return;
+        if (prefersReducedMotion() || !("startViewTransition" in document)) {
             switchTheme();
             return;
         }
+        const animation = createAnimation(variant, start, blur, gifUrl);
+        updateStyles(animation.css);
         (document as any).startViewTransition(switchTheme);
     }, [setTheme, variant, start, blur, gifUrl, updateStyles]);
 
@@ -666,7 +670,7 @@ export const ThemeToggleButton = ({
             variant="ghost"
             size="icon"
             className={cn(
-                "size-10 cursor-pointer p-0 transition-all duration-300 active:scale-95",
+                "size-10 cursor-pointer p-0 transition-[color,transform] duration-300 active:scale-95",
                 className
             )}
             onClick={toggleTheme}

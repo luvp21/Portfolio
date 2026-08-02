@@ -50,6 +50,7 @@ export async function GET() {
       },
       body: JSON.stringify({ query: QUERY, variables: { username: LEETCODE_USERNAME } }),
       next: { revalidate: 300 }, // cache for 1 hour
+      signal: AbortSignal.timeout(5000),
     });
 
     if (!res.ok) return NextResponse.json({ error: "Failed to fetch" }, { status: 502 });

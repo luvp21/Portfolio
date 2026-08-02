@@ -7,6 +7,7 @@ import { motion, type PanInfo, useMotionValue } from "framer-motion"
 import { X, Minimize2, Pin, PinOff } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { SPRING_SNAPPY } from "@/lib/motion"
 
 interface PanelProps {
   title: string
@@ -95,6 +96,14 @@ export function Panel({
     }
   }, [canvasBoundaries, size, x, y, onPositionChange])
 
+  // Shared drag start logic for mouse + touch
+  const startDrag = (clientX: number, clientY: number) => {
+    setIsDragging(true)
+    setDragStartPos({ x: clientX, y: clientY })
+    setInitialPanelPos({ x: x.get(), y: y.get() })
+    if (onFocus) onFocus()
+  }
+
   // Handle mouse down on title bar
   const handleTitleBarMouseDown = (e: React.MouseEvent) => {
     if (isPinned) return
@@ -103,22 +112,32 @@ export function Panel({
     const target = e.target as HTMLElement
     if (target.closest('button')) return
 
-    setIsDragging(true)
-    setDragStartPos({ x: e.clientX, y: e.clientY })
-    setInitialPanelPos({ x: x.get(), y: y.get() })
-
-    if (onFocus) onFocus()
+    startDrag(e.clientX, e.clientY)
     e.preventDefault()
     e.stopPropagation()
   }
 
-  // Handle mouse move for dragging
+  // Handle touch start on title bar (tablets / touch devices)
+  const handleTitleBarTouchStart = (e: React.TouchEvent) => {
+    if (isPinned) return
+
+    const target = e.target as HTMLElement
+    if (target.closest('button')) return
+
+    const touch = e.touches[0]
+    if (!touch) return
+
+    startDrag(touch.clientX, touch.clientY)
+    e.stopPropagation()
+  }
+
+  // Handle mouse/touch move for dragging
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const updateDragPosition = (clientX: number, clientY: number) => {
       if (!isDragging || isPinned) return
 
-      const deltaX = (e.clientX - dragStartPos.x) / canvasScale
-      const deltaY = (e.clientY - dragStartPos.y) / canvasScale
+      const deltaX = (clientX - dragStartPos.x) / canvasScale
+      const deltaY = (clientY - dragStartPos.y) / canvasScale
 
       let newX = initialPanelPos.x + deltaX
       let newY = initialPanelPos.y + deltaY
@@ -141,7 +160,17 @@ export function Panel({
       y.set(newY)
     }
 
-    const handleMouseUp = () => {
+    const handleMouseMove = (e: MouseEvent) => updateDragPosition(e.clientX, e.clientY)
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0]
+      if (!touch) return
+      // Prevent the page from scrolling while dragging a panel
+      e.preventDefault()
+      updateDragPosition(touch.clientX, touch.clientY)
+    }
+
+    const endDrag = () => {
       if (isDragging) {
         setIsDragging(false)
 
@@ -154,11 +183,17 @@ export function Panel({
 
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('mouseup', endDrag)
+      document.addEventListener('touchmove', handleTouchMove, { passive: false })
+      document.addEventListener('touchend', endDrag)
+      document.addEventListener('touchcancel', endDrag)
 
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
-        document.removeEventListener('mouseup', handleMouseUp)
+        document.removeEventListener('mouseup', endDrag)
+        document.removeEventListener('touchmove', handleTouchMove)
+        document.removeEventListener('touchend', endDrag)
+        document.removeEventListener('touchcancel', endDrag)
       }
     }
   }, [isDragging, dragStartPos, initialPanelPos, x, y, onPositionChange, isPinned, isGridSnap, canvasBoundaries, size])
@@ -260,15 +295,24 @@ export function Panel({
         x,
         y,
         zIndex,
-        width: isMinimized ? "auto" : size.width,
-        height: isMinimized ? "auto" : size.height,
       }}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{
         opacity: 1,
-        scale: isDragging && !isPinned ? 1.02 : 1
+        scale: isDragging && !isPinned ? 1.02 : 1,
+        width: size.width,
+        // Collapse to a fixed titlebar height rather than "auto" — Framer
+        // Motion measures "auto" targets by reading the DOM before the
+        // content div's `hidden` class (driven by the same isMinimized
+        // state) has actually applied, producing a wrong, stuck value.
+        height: isMinimized ? 48 : size.height,
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{
+        ...SPRING_SNAPPY,
+        width: { duration: 0.3, ease: "easeOut" },
+        height: { duration: 0.3, ease: "easeOut" },
+      }}
       id={id}
       onClick={handlePanelClick}
     >
@@ -276,11 +320,12 @@ export function Panel({
       <div
         ref={titleBarRef}
         className={cn(
-          "flex items-center justify-between p-3 bg-muted/50 border-b",
+          "flex items-center justify-between p-3 bg-muted/50 border-b touch-none",
           !isPinned && "cursor-grab select-none",
           isDragging && !isPinned && "cursor-grabbing",
         )}
         onMouseDown={handleTitleBarMouseDown}
+        onTouchStart={handleTitleBarTouchStart}
       >
         <div className="flex items-center gap-2">
           {icon && <span className="text-muted-foreground">{icon}</span>}
