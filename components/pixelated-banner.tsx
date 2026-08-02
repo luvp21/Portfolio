@@ -49,18 +49,14 @@ export function PixelatedBanner({
               <p className="text-foreground font-mono mb-4 tracking-wide text-sm xl:text-base">
                 {PERSONAL.readmePath}
               </p>
-              <p
-                className="gaegu-text text-foreground leading-tight"
-                style={{ fontSize: "4rem" }}
-              >
-                {PERSONAL.headline[0]}
-              </p>
-              <p
-                className="gaegu-text text-foreground leading-tight -mt-2"
-                style={{ fontSize: "3.5rem" }}
-              >
-                {PERSONAL.headline[1]}
-              </p>
+              <h1 className="gaegu-text text-foreground leading-tight">
+                <span className="block" style={{ fontSize: "4rem" }}>
+                  {PERSONAL.headline[0]}
+                </span>
+                <span className="block -mt-2" style={{ fontSize: "3.5rem" }}>
+                  {PERSONAL.headline[1]}
+                </span>
+              </h1>
               <p
                 className="gaegu-text text-muted-foreground leading-relaxed"
                 style={{ fontSize: "1.15rem" }}
@@ -122,7 +118,7 @@ export function PixelatedBanner({
         />
 
         {/* ── RIGHT: Discord + Socials ── */}
-        <div className="w-[clamp(220px,24%,340px)] shrink-0 flex flex-col py-[2%] pointer-events-auto gap-3 border-t border-b border-r border-foreground/30">
+        <div className="w-[clamp(220px,24%,340px)] shrink-0 flex flex-col py-[2%] pointer-events-auto gap-3">
           <DiscordPresence />
           <div className="flex flex-col">
             {BANNER_SOCIALS.map((s) => (
@@ -163,7 +159,7 @@ export function PixelatedBanner({
       {/* ── Blur/dim overlay (avoids filter on parent which blacks out backdrop-filter children) ── */}
       <div
         className={cn(
-          "absolute inset-0 pointer-events-none backdrop-blur-sm bg-background/50 transition-opacity duration-700 ease-in-out",
+          "absolute inset-0 pointer-events-none backdrop-blur-sm bg-background/50 transition-opacity duration-500 ease-in-out",
           isBlurred ? "opacity-100" : "opacity-0"
         )}
       />

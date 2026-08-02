@@ -29,14 +29,14 @@ export const ProjectCard = memo(function ProjectCard({
     // allow overflow so tooltips aren't clipped
     <TooltipProvider delayDuration={0}>
       <motion.div
-        className="flex flex-col h-full rounded-2xl overflow-visible border bg-card text-card-foreground"
+        className="flex flex-col h-full rounded-2xl overflow-visible border bg-card text-card-foreground group"
       >
         {/* IMAGE */}
         <div className="relative overflow-hidden rounded-t-2xl">
           <img
             src={image || "/placeholder.svg"}
             alt={title}
-            className="w-full h-44 object-cover transition-all duration-300"
+            className="w-full h-44 object-cover transition-transform duration-300 group-hover:scale-105"
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-40" />
@@ -55,7 +55,7 @@ export const ProjectCard = memo(function ProjectCard({
                       href={githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-lg bg-card border border-neutral-700"
+                      className="p-2 rounded-lg bg-card border border-neutral-700 transition-[background-color,transform] duration-150 hover:bg-accent active:scale-95"
                       aria-label="Open GitHub"
                     >
                       <Github className="h-4 w-4 text-foreground" />
@@ -80,7 +80,7 @@ export const ProjectCard = memo(function ProjectCard({
                       href={liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-lg bg-card border border-neutral-700"
+                      className="p-2 rounded-lg bg-card border border-neutral-700 transition-[background-color,transform] duration-150 hover:bg-accent active:scale-95"
                       aria-label="Open Live Demo"
                     >
                       <ExternalLink className="h-4 w-4 text-foreground" />
@@ -110,8 +110,18 @@ export const ProjectCard = memo(function ProjectCard({
             <div className="mt-3 flex flex-wrap items-center gap-2.5">
               {tags.map((tag) => {
                 const Icon = techIcons[tag]
-                if (!Icon) return null // Drop text fallback completely
-                
+
+                if (!Icon) {
+                  return (
+                    <span
+                      key={tag}
+                      className="flex items-center justify-center h-[22px] px-2 rounded-full text-[11px] font-medium text-muted-foreground bg-muted/40"
+                    >
+                      {tag}
+                    </span>
+                  )
+                }
+
                 return (
                   <Tooltip key={tag}>
                     <TooltipTrigger asChild>

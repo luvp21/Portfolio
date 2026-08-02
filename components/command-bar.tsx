@@ -23,8 +23,7 @@ import {
   Send,
   X,
 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useTheme } from "@/components/theme-provider"
+import { PROFILE_LINKS, BANNER_SOCIALS } from "@/lib/data"
 
 interface CommandBarProps {
   open: boolean
@@ -41,7 +40,6 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
   const menuScrollRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   const mouseMoveTimerRef = useRef<number | null>(null)
-  const { theme } = useTheme()
 
   // Detect mobile device
   useEffect(() => {
@@ -188,19 +186,19 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
       let url = ""
       switch (value) {
         case "github":
-          url = "https://github.com/luvp21"
+          url = BANNER_SOCIALS.find((s) => s.label === "GitHub")?.href ?? ""
           break
         case "linkedin":
-          url = "https://linkedin.com/in/luvv"
+          url = BANNER_SOCIALS.find((s) => s.label === "LinkedIn")?.href ?? ""
           break
         case "twitter":
-          url = "https://twitter.com/luvp_21"
+          url = BANNER_SOCIALS.find((s) => s.label === "X")?.href ?? ""
           break
         case "email":
-          url = "mailto:luvvvpatel@email.com"
+          url = PROFILE_LINKS.find((l) => l.label === "Email")?.href ?? ""
           break
       }
-      window.open(url, "_blank")
+      if (url) window.open(url, "_blank")
       onOpenChange(false)
     } else if (value === "downloadcv") {
       window.open("/Luv.pdf", "_blank")
@@ -446,24 +444,14 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
     )
   }
 
-  const accentColor = theme === "dark" ? "#A374FF" : "hsl(var(--name))"
-
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
+    open && (
+        <div
           className="fixed inset-0 z-[9999] flex items-start justify-end bg-black/50 backdrop-blur-sm rounded-lg py-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           onClick={() => onOpenChange(false)}
         >
-          <motion.div
+          <div
             className="w-full max-w-sm h-full bg-background shadow-lg rounded-lg overflow-hidden flex flex-col border"
-            initial={{ x: 300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 300, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col h-full rounded-lg">
@@ -503,9 +491,8 @@ export function CommandBar({ open, onOpenChange, onExecuteCommand }: CommandBarP
                 <div className="p-0">{renderMenuContent()}</div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+    )
   )
 }

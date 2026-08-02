@@ -1,11 +1,12 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import { Award, Star, Trophy, Medal, Sparkles, ExternalLink } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ACHIEVEMENTS } from "@/lib/data"
 
 export function AchievementsCard() {
+  const shouldReduceMotion = useReducedMotion()
 
   const getIcon = (iconType: string) => {
     switch (iconType) {
@@ -32,9 +33,9 @@ export function AchievementsCard() {
           <motion.div
             key={achievement.id}
             className="px-2 flex items-center gap-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, transform: shouldReduceMotion ? "translateY(0px)" : "translateY(20px)" }}
+            animate={{ opacity: 1, transform: "translateY(0px)" }}
+            transition={{ duration: shouldReduceMotion ? 0.15 : 0.3 }}
           >
             <div className="p-2 rounded-full bg-primary/10 text-name">
               {getIcon(achievement.icon)}

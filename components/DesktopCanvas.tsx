@@ -1,5 +1,6 @@
 // components/DesktopCanvas.tsx
 import React from "react"
+import { AnimatePresence } from "framer-motion"
 import type { PanelType, PanelState, PanelDimensions } from "./types"
 import { Panel } from "@/components/panel"
 import { User, Briefcase, History, FileText, Layers, Award } from "lucide-react"
@@ -40,7 +41,7 @@ export function DesktopCanvas({
     canvasScale,
 }: DesktopCanvasProps) {
     return (
-        <>
+        <AnimatePresence>
             {isInitialized &&
                 viewportSize.width > 0 &&
                 viewportSize.height > 0 &&
@@ -119,6 +120,6 @@ export function DesktopCanvas({
                         </Panel>
                     )
                 })}
-        </>
+        </AnimatePresence>
     )
 }

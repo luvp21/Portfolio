@@ -18,9 +18,9 @@ interface ThemeContextProps {
 }
 
 const ThemeContext = createContext<ThemeContextProps>({
-  theme: "light",
+  theme: "dark",
   setTheme: () => {},
-  resolvedTheme: "light",
+  resolvedTheme: "dark",
 });
 
 function useResponsive() {
@@ -59,8 +59,8 @@ function applyThemeToDocument(t: Theme) {
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { isMobile } = useResponsive();
 
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [resolvedTheme, setResolvedTheme] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
+  const [resolvedTheme, setResolvedTheme] = useState<Theme>("dark");
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
@@ -95,8 +95,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       setResolvedTheme(stored);
       applyThemeToDocument(stored);
     } else {
-      // FORCE LIGHT AS DEFAULT ALWAYS
-      const initial: Theme = "light";
+      // FORCE DARK AS DEFAULT ALWAYS
+      const initial: Theme = "dark";
       setThemeState(initial);
       setResolvedTheme(initial);
       applyThemeToDocument(initial);

@@ -27,11 +27,7 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
 
-        /* optional/dock/name/title tokens (left as vars so you can add them) */
-        dock: "var(--dock)",
         name: "var(--name)",
-        title: "var(--title)",
-        cborder: "var(--cborder)",
 
         /* semantic objects with foreground helpers */
         primary: {

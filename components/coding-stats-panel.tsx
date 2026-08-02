@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Flame, Trophy, CheckCircle2, Circle, Clock } from "lucide-react";
 import {
     eachDayOfInterval,
@@ -52,6 +52,7 @@ export function CodingStatsPanel() {
     const [ghData, setGhData] = useState<any>(null);
     const [lcData, setLcData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const shouldReduceMotion = useReducedMotion();
 
     useEffect(() => {
         Promise.all([
@@ -178,9 +179,9 @@ export function CodingStatsPanel() {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            initial={{ opacity: 0, transform: shouldReduceMotion ? "translateY(0px)" : "translateY(8px)" }}
+            animate={{ opacity: 1, transform: "translateY(0px)" }}
+            transition={{ duration: shouldReduceMotion ? 0.15 : 0.35, ease: "easeOut" }}
             className="w-full bg-card/80 pointer-events-auto select-none flex px-4"
         >
             {/* ── Left column ──────────────────────────────────────────────── */}
@@ -302,7 +303,7 @@ export function CodingStatsPanel() {
 
             {/* ── Right column: Heatmap ────────────────────────────────────── */}
             <div className="flex flex-col justify-between flex-1 min-w-0 px-3 py-3.5">
-                <div className="overflow-x-auto overflow-y-hidden no-scrollbar">
+                <div className="overflow-x-auto overflow-y-hidden hide-scrollbar">
                     <svg
                         className="block overflow-visible"
                         width={svgWidth}

@@ -194,7 +194,7 @@ export const PROJECTS: Project[] = [
         tags: ["Next.js", "TypeScript", "Express", "WebSockets", "PostgreSQL", "Prisma", "Turborepo"],
         image: "/excalidraw.png",
         githubUrl: "https://github.com/luvp21/CollabDraw",
-        liveUrl: "", // Add live demo link here if available
+        liveUrl: "https://collabdraw.luvvv.me",
     },
     {
         title: "DinoSprint – Pixel Endless Runner",
