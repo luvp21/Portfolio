@@ -3,6 +3,7 @@ import './globals.css'
 import { ThemeProvider } from "@/components/theme-provider"
 import { Caveat, Press_Start_2P, Gaegu } from 'next/font/google'
 import { PERSONAL, PROFILE_LINKS } from '@/lib/data'
+import { Analytics } from '@vercel/analytics/next'
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -39,9 +40,9 @@ export const metadata: Metadata = {
     siteName: 'Luv Patel Portfolio',
     images: [
       {
-        url: '/portfolio.png',
-        width: 1200,
-        height: 630,
+        url: 'https://www.luvvv.me/portfolio.png',
+        width: 1916,
+        height: 1085,
         alt: 'Luv Patel Portfolio',
       },
     ],
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Luv Patel - Full Stack Developer',
     description: 'Computer Science student and Full Stack Developer specializing in React, Next.js, and modern web technologies.',
-    images: ['/portfolio.png'],
+    images: ['https://www.luvvv.me/portfolio.png'],
   },
   robots: {
     index: true,
@@ -78,7 +79,7 @@ const PERSON_JSON_LD = {
   '@type': 'Person',
   name: PERSONAL.name,
   url: 'https://luvvv.me',
-  image: 'https://luvvv.me' + PERSONAL.avatar,
+  image: 'https://www.luvvv.me' + PERSONAL.avatar,
   jobTitle: 'Full Stack Developer',
   description: PERSONAL.bio,
   email: PROFILE_LINKS.find((link) => link.label === 'Email')?.href.replace('mailto:', ''),
@@ -124,6 +125,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
