@@ -3,6 +3,7 @@ import './globals.css'
 import { ThemeProvider } from "@/components/theme-provider"
 import { Caveat, Press_Start_2P, Gaegu } from 'next/font/google'
 import { PERSONAL, PROFILE_LINKS } from '@/lib/data'
+import { Analytics } from '@vercel/analytics/next'
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -124,6 +125,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
