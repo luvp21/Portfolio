@@ -49,5 +49,25 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "overrides": {
+    "brace-expansion": {
+      "brace-expansion": "5.0.9"
+    },
+    "glob": {
+      "brace-expansion": "5.0.9"
+    },
+    "minimatch": {
+      "brace-expansion": "5.0.9"
+    },
+    "sucrase": {
+      "brace-expansion": "5.0.9"
+    },
+    "tailwindcss": {
+      "brace-expansion": "5.0.9"
+    },
+    "tailwindcss-animate": {
+      "brace-expansion": "5.0.9"
+    }
   }
 }
