@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Luv Patel' }],
   creator: 'Luv Patel',
   alternates: {
-    canonical: '/',
+    canonical: 'https://luvvv.me',
   },
   openGraph: {
     title: 'Luv Patel - Full Stack Developer',
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     siteName: 'Luv Patel Portfolio',
     images: [
       {
-        url: 'https://www.luvvv.me/portfolio.png',
-        width: 1916,
-        height: 1085,
+        url: 'https://luvvv.me/og.png',
+        width: 1200,
+        height: 630,
         alt: 'Luv Patel Portfolio',
       },
     ],
@@ -53,7 +53,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Luv Patel - Full Stack Developer',
     description: 'Computer Science student and Full Stack Developer specializing in React, Next.js, and modern web technologies.',
-    images: ['https://www.luvvv.me/portfolio.png'],
+    images: ['https://luvvv.me/og.png'],
+    creator: '@luvp_21',
   },
   robots: {
     index: true,
@@ -79,7 +80,7 @@ const PERSON_JSON_LD = {
   '@type': 'Person',
   name: PERSONAL.name,
   url: 'https://luvvv.me',
-  image: 'https://www.luvvv.me' + PERSONAL.avatar,
+  image: 'https://luvvv.me' + PERSONAL.avatar,
   jobTitle: 'Full Stack Developer',
   description: PERSONAL.bio,
   email: PROFILE_LINKS.find((link) => link.label === 'Email')?.href.replace('mailto:', ''),
